@@ -10,6 +10,7 @@
     </style>
     <script>
         // Configure Tailwind CSS to use Inter font and custom colors if needed
+        // IMPORTANT: This block must be AFTER the Tailwind CSS CDN script.
         tailwind.config = {
             theme: {
                 extend: {
@@ -31,8 +32,27 @@
     </script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, addDoc, deleteDoc, onSnapshot, collection, query, where, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Configuration (for Netlify Deployment) ---
+        // IMPORTANT: 请将以下占位符替换为您的实际 Firebase 项目配置。
+        // 您可以在 Firebase 项目控制台 -> 项目设置 -> 概览 -> 您的应用 -> Firebase SDK 配置 (Config) 中找到这些信息。
+        // 请确保这些值是您从 Firebase 控制台复制的正确值。
+        const firebaseConfig = {
+            apiKey: "YOUR_FIREBASE_API_KEY", // <-- 替换为您的 API Key
+            authDomain: "YOUR_FIREBASE_AUTH_DOMAIN", // <-- 替换为您的 Auth Domain
+            projectId: "YOUR_FIREBASE_PROJECT_ID", // <-- 替换为您的 Project ID
+            storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET", // <-- 替换为您的 Storage Bucket
+            messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID", // <-- 替换为您的 Messaging Sender ID
+            // appId: "YOUR_FIREBASE_APP_ID_FROM_CONFIG" // 通常不需要在这里设置，除非您有特殊需求
+        };
+
+        // 此自定义应用 ID 用于构建 Firestore 数据路径。
+        // 它应该是您此特定部署应用实例的唯一标识符。
+        // 对于 Netlify，您可以使用您的 Netlify 站点名称（例如：'my-fitness-app-123'）。
+        // 请替换为您的实际应用标识符，例如：'my-personal-fitness-tracker'
+        const APP_IDENTIFIER = "your-unique-app-identifier";
 
         // Global Firebase variables
         let app;
@@ -41,16 +61,116 @@
         let userId = 'anonymous'; // Default to anonymous
         let currentSelectedExercise = ''; // To store the currently selected exercise for logging and charting
 
+        // Define a mapping of exercises to their muscle groups
+        const exerciseToMuscleGroupMap = {
+            '哑铃上斜推': '胸部训练',
+            '史密斯机下斜推': '胸部训练',
+            '蝴蝶机夹胸': '胸部训练',
+            '杠铃卧推': '胸部训练',
+            '龙门架单臂绳索划船': '背部训练',
+            '哑铃单臂划船': '背部训练',
+            '杠铃俯身划船': '背部训练',
+            '高位下拉器宽握下拉': '背部训练',
+            '哑铃侧平举': '肩部训练',
+            '龙门架绳索面拉': '肩部训练',
+            '杠铃前平举': '肩部训练',
+            '史密斯机坐姿推举': '肩部训练',
+            '史密斯机弓步': '腿部训练',
+            '腿伸展器': '腿部训练',
+            '龙门架绳索臀推': '腿部训练',
+            '杠铃深蹲': '腿部训练',
+            '哑铃锤式弯举': '手臂训练',
+            '史密斯机窄握推胸': '手臂训练',
+            '龙门架绳索下压': '手臂训练',
+            '杠铃弯举': '手臂训练'
+        };
+
+        // Define the training sequence for suggestions
+        const trainingSequence = [
+            '胸部训练',
+            '背部训练',
+            '肩部训练',
+            '腿部训练',
+            '手臂训练'
+        ];
+
+        // Define full training plans with exercises and stretches
+        const fullTrainingPlans = {
+            '胸部训练': {
+                exercises: [
+                    { name: '哑铃上斜推', setsReps: '4 组 × 10-12 次', target: '胸部上缘' },
+                    { name: '史密斯机下斜推', setsReps: '4 组 × 8-12 次', target: '胸部下缘' },
+                    { name: '蝴蝶机夹胸', setsReps: '4 组 × 12-15 次', target: '胸大肌内侧' },
+                    { name: '杠铃卧推', setsReps: '4 组 × 8-12 次', target: '全面胸肌', best: true }
+                ],
+                stretches: [
+                    '门框胸部拉伸 - 双臂撑门框，身体前倾，拉伸胸大肌（20-30秒，2-3次）',
+                    '手臂后拉伸 - 一手抓住另一侧手臂，向后拉，放松胸部和肩前（20-30秒，2-3次）',
+                    '跪姿胸椎伸展 - 跪地，双手前伸，胸部下沉，拉伸胸肌和背部（20-30秒，2-3次）'
+                ]
+            },
+            '背部训练': {
+                exercises: [
+                    { name: '龙门架单臂绳索划船', setsReps: '每侧 4 组 × 10-12 次', target: '背部细节' },
+                    { name: '哑铃单臂划船', setsReps: '每侧 4 组 × 10-12 次', target: '背阔肌和斜方肌' },
+                    { name: '杠铃俯身划船', setsReps: '4 组 × 8-10 次', target: '背部厚度' },
+                    { name: '高位下拉器宽握下拉', setsReps: '4 组 × 8-12 次', target: '背阔肌宽度', best: true }
+                ],
+                stretches: [
+                    '猫式拉伸 - 双手撑地，背部拱起，放松背阔肌（20-30秒，2-3次）',
+                    '侧身拉伸 - 站立，一手向上伸展并侧倾，拉伸背侧（20-30秒，2-3次）',
+                    '手臂交叉拉伸 - 双臂交叉于胸前，一手拉另一手臂，放松上背（20-30秒，2-3次）'
+                ]
+            },
+            '肩部训练': {
+                exercises: [
+                    { name: '哑铃侧平举', setsReps: '4 组 × 12-15 次', target: '三角肌中束' },
+                    { name: '龙门架绳索面拉', setsReps: '4 组 × 12-15 次', target: '三角肌后束' },
+                    { name: '杠铃前平举', setsReps: '4 组 × 10-12 次', target: '三角肌前束' },
+                    { name: '史密斯机坐姿推举', setsReps: '4 组 × 8-12 次', target: '三角肌整体', best: true }
+                ],
+                stretches: [
+                    '手臂跨胸拉伸 - 一手臂横跨胸前，另一手轻压，拉伸三角肌后束（20-30秒，2-3次）',
+                    '肩部后拉 - 双手背后相握，向后拉，打开肩前（20-30秒，2-3次）',
+                    '颈部侧拉 - 一手拉头部向一侧，放松斜方肌和肩部（20-30秒，2-3次）'
+                ]
+            },
+            '腿部训练': {
+                exercises: [
+                    { name: '史密斯机弓步', setsReps: '每侧 4 组 × 10-12 次', target: '单腿力量' },
+                    { name: '腿伸展器', setsReps: '4 组 × 12-15 次', target: '股四头肌' },
+                    { name: '龙门架绳索臀推', setsReps: '4 组 × 12-15 次', target: '臀大肌和腘绳肌' },
+                    { name: '杠铃深蹲', setsReps: '4 组 × 8-12 次', target: '腿部整体', best: true }
+                ],
+                stretches: [
+                    '股四头肌拉伸 - 站立，一手拉脚跟至臀部，拉伸大腿前侧（20-30秒，2-3次）',
+                    '腘绳肌拉伸 - 坐地，一腿伸直，身体前倾，拉伸腿后侧（20-30秒，2-3次）',
+                    '臀部拉伸 - 坐姿，一腿交叉于另一腿上，身体前倾，拉伸臀肌（20-30秒，2-3次）'
+                ]
+            },
+            '手臂训练': {
+                exercises: [
+                    { name: '哑铃锤式弯举', setsReps: '4 组 × 10-12 次', target: '肱肌和前臂' },
+                    { name: '史密斯机窄握推胸', setsReps: '4 组 × 8-12 次', target: '肱三头肌' },
+                    { name: '龙门架绳索下压', setsReps: '4 组 × 12-15 次', target: '肱三头肌', best: true },
+                    { name: '杠铃弯举', setsReps: '4 组 × 8-12 次', target: '肱二头肌', best: true }
+                ],
+                stretches: [
+                    '肱二头肌拉伸 - 手臂伸直，手掌朝下靠墙，身体轻转，拉伸二头肌（20-30秒，2-3次）',
+                    '肱三头肌拉伸 - 一手弯曲过头顶，另一手轻压肘部，拉伸三头肌（20-30秒，2-3次）',
+                    '前臂拉伸 - 一手拉另一手手指向后，拉伸前臂肌群（20-30秒，2-3次）'
+                ]
+            }
+        };
+
+
         // Initialize Firebase and authenticate
         window.initFirebase = async () => {
             try {
-                // Get app ID and Firebase config from global variables provided by the environment
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-
-                if (Object.keys(firebaseConfig).length === 0) {
-                    console.error("Firebase config is missing. Cannot initialize Firebase.");
-                    showMessage("Firebase配置缺失，无法初始化。");
+                // 检查 Firebase 配置是否完整
+                if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+                    console.error("Firebase config is incomplete. Please update firebaseConfig with your actual project details.");
+                    showMessage("Firebase配置不完整，请更新项目详情。");
                     return;
                 }
 
@@ -58,14 +178,11 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
 
-                // Authenticate user
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                    console.log("Signed in with custom token.");
-                } else {
-                    await signInAnonymously(auth);
-                    console.log("Signed in anonymously.");
-                }
+                // 在部署环境中，__initial_auth_token 不可用。
+                // 我们将默认进行匿名登录。如果需要更强大的认证（例如 Google 登录），
+                // 您需要集成 Firebase Auth UI 或自定义流程。
+                await signInAnonymously(auth);
+                console.log("Signed in anonymously.");
 
                 // Listen for auth state changes to get the user ID
                 onAuthStateChanged(auth, (user) => {
@@ -76,6 +193,7 @@
                         document.getElementById('userIdDisplay').textContent = `用户ID: ${userId}`;
                         // Once authenticated, populate exercises and load data
                         populateExerciseDropdown();
+                        displaySuggestedTrainingPlan(); // Display initial suggestion
                     } else {
                         userId = 'anonymous';
                         document.getElementById('userIdDisplay').textContent = `用户ID: ${userId} (匿名)`;
@@ -83,6 +201,7 @@
                         // Clear chart if no user is signed in
                         exerciseLogs = [];
                         updateChart();
+                        document.getElementById('suggestedTrainingContent').innerHTML = '<p class="text-gray-600">请登录以查看您的建议训练计划。</p>';
                     }
                 });
 
@@ -103,12 +222,25 @@
         window.showMessage = (message) => {
             const messageBox = document.getElementById('messageBox');
             const messageText = document.getElementById('messageText');
-            messageText.textContent = message;
             messageBox.classList.remove('hidden');
+            messageText.textContent = message;
             setTimeout(() => {
                 messageBox.classList.add('hidden');
             }, 3000); // Hide after 3 seconds
         };
+
+        // Get muscle group for a given exercise name
+        function getMuscleGroupForExercise(exerciseName) {
+            // First, check the predefined map
+            if (exerciseToMuscleGroupMap[exerciseName]) {
+                return exerciseToMuscleGroupMap[exerciseName];
+            }
+            // If not found in predefined, it might be a custom exercise.
+            // For custom exercises, we don't have a direct muscle group mapping unless user provides it.
+            // For simplicity, we'll return a generic "自定义训练" or similar.
+            // A more advanced feature would allow users to assign muscle groups to custom exercises.
+            return '自定义训练'; // Default for custom exercises
+        }
 
         // Populate the exercise dropdown from HTML tables and Firestore custom exercises
         window.populateExerciseDropdown = async () => {
@@ -117,22 +249,25 @@
 
             const uniqueExercises = new Set();
 
-            // 1. Get exercises from HTML tables
-            const exerciseTables = document.querySelectorAll('.exercise-table tbody tr');
-            exerciseTables.forEach(row => {
-                const exerciseName = row.cells[0].textContent.trim().replace('（最佳动作）', '').trim();
-                if (exerciseName) {
-                    uniqueExercises.add(exerciseName);
-                }
-            });
+            // 1. Get exercises from predefined fullTrainingPlans
+            for (const muscleGroup in fullTrainingPlans) {
+                fullTrainingPlans[muscleGroup].exercises.forEach(ex => {
+                    uniqueExercises.add(ex.name);
+                });
+            }
 
             // 2. Get custom exercises from Firestore
             if (db && userId && userId !== 'anonymous') {
                 try {
-                    const customExerciseCollectionRef = collection(db, `artifacts/${__app_id}/users/${userId}/custom_exercises`);
+                    const customExerciseCollectionRef = collection(db, `artifacts/${APP_IDENTIFIER}/users/${userId}/custom_exercises`);
                     const snapshot = await getDocs(customExerciseCollectionRef);
                     snapshot.forEach(doc => {
-                        uniqueExercises.add(doc.data().name);
+                        const customExerciseName = doc.data().name;
+                        uniqueExercises.add(customExerciseName);
+                        // Add custom exercise to the map if it's not already there
+                        if (!exerciseToMuscleGroupMap[customExerciseName]) {
+                            exerciseToMuscleGroupMap[customExerciseName] = '自定义训练'; // Assign a generic muscle group for custom exercises
+                        }
                     });
                 } catch (e) {
                     console.error("Error fetching custom exercises:", e);
@@ -176,7 +311,7 @@
             }
 
             try {
-                const customExerciseCollectionRef = collection(db, `artifacts/${__app_id}/users/${userId}/custom_exercises`);
+                const customExerciseCollectionRef = collection(db, `artifacts/${APP_IDENTIFIER}/users/${userId}/custom_exercises`);
                 // Check if exercise already exists to prevent duplicates
                 const q = query(customExerciseCollectionRef, where("name", "==", exerciseName));
                 const snapshot = await getDocs(q);
@@ -195,6 +330,111 @@
             }
         };
 
+        // Fetch last training information from Firestore
+        async function fetchLastTrainingInfo() {
+            if (!db || !userId || userId === 'anonymous') {
+                return null;
+            }
+            try {
+                const lastTrainingDocRef = doc(db, `artifacts/${APP_IDENTIFIER}/users/${userId}/app_state/last_training_info`);
+                const docSnap = await getDoc(lastTrainingDocRef);
+                if (docSnap.exists()) {
+                    return docSnap.data();
+                }
+            } catch (e) {
+                console.error("Error fetching last training info:", e);
+            }
+            return null;
+        }
+
+        // Update last training information in Firestore
+        async function updateLastTrainingInfo(muscleGroup) {
+            if (!db || !userId || userId === 'anonymous' || !muscleGroup) {
+                return;
+            }
+            try {
+                const lastTrainingDocRef = doc(db, `artifacts/${APP_IDENTIFIER}/users/${userId}/app_state/last_training_info`);
+                await setDoc(lastTrainingDocRef, {
+                    lastTrainedDate: new Date().toLocaleDateString('zh-CN'),
+                    lastTrainedMuscleGroup: muscleGroup,
+                    timestamp: Date.now()
+                });
+                console.log("Last training info updated:", muscleGroup);
+            } catch (e) {
+                console.error("Error updating last training info:", e);
+            }
+        }
+
+        // Display the suggested training plan based on the last trained muscle group
+        window.displaySuggestedTrainingPlan = async () => {
+            const suggestedTrainingContentDiv = document.getElementById('suggestedTrainingContent');
+            if (!suggestedTrainingContentDiv) return; // Ensure element exists
+
+            if (!db || !userId || userId === 'anonymous') {
+                suggestedTrainingContentDiv.innerHTML = '<p class="text-gray-600">请登录以查看您的建议训练计划。</p>';
+                return;
+            }
+
+            let suggestedMuscleGroup = trainingSequence[0]; // Default to Chest if no history
+
+            const lastTrainingInfo = await fetchLastTrainingInfo();
+            if (lastTrainingInfo && lastTrainingInfo.lastTrainedMuscleGroup) {
+                const lastGroup = lastTrainingInfo.lastTrainedMuscleGroup;
+                const lastIndex = trainingSequence.indexOf(lastGroup);
+                if (lastIndex !== -1) {
+                    const nextIndex = (lastIndex + 1) % trainingSequence.length;
+                    suggestedMuscleGroup = trainingSequence[nextIndex];
+                }
+            }
+
+            const plan = fullTrainingPlans[suggestedMuscleGroup];
+            if (plan) {
+                let html = `<h3 class="text-secondary text-xl font-bold mb-3">今日建议训练：${suggestedMuscleGroup}</h3>`;
+                html += `<table class="exercise-table w-full border-collapse my-4 rounded-lg overflow-hidden">
+                            <thead>
+                                <tr class="bg-primary text-white">
+                                    <th class="p-3 text-left border border-primary">动作</th>
+                                    <th class="p-3 text-left border border-primary">组数与次数</th>
+                                    <th class="p-3 text-left border border-primary">目标肌群</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                plan.exercises.forEach(ex => {
+                    html += `<tr class="bg-gray-50 even:bg-gray-100">
+                                <td>${ex.best ? `<strong class="text-primary">${ex.name}</strong>` : ex.name}</td>
+                                <td>${ex.setsReps}</td>
+                                <td>${ex.target}</td>
+                            </tr>`;
+                });
+                html += `</tbody></table>`;
+                html += `<h3 class="text-secondary text-xl font-semibold mt-6 mb-3">拉伸</h3>
+                         <ul class="list-disc list-inside text-gray-700">`;
+                plan.stretches.forEach(stretch => {
+                    html += `<li>${stretch}</li>`;
+                });
+                html += `</ul>`;
+                suggestedTrainingContentDiv.innerHTML = html;
+
+                // Pre-select the suggested exercise in the dropdown
+                const exerciseSelect = document.getElementById('exerciseSelect');
+                if (exerciseSelect) {
+                    const firstSuggestedExercise = plan.exercises[0] ? plan.exercises[0].name : '';
+                    if (exerciseSelect.querySelector(`option[value="${firstSuggestedExercise}"]`)) {
+                        exerciseSelect.value = firstSuggestedExercise;
+                        currentSelectedExercise = firstSuggestedExercise; // Update current selected
+                        loadExerciseData(firstSuggestedExercise); // Load data for this pre-selected exercise
+                    } else if (exerciseSelect.options.length > 1) { // Fallback to first available if suggested not found
+                        exerciseSelect.value = exerciseSelect.options[1].value;
+                        currentSelectedExercise = exerciseSelect.options[1].value;
+                        loadExerciseData(exerciseSelect.options[1].value);
+                    }
+                }
+
+            } else {
+                suggestedTrainingContentDiv.innerHTML = '<p class="text-gray-600">无法加载建议训练计划。</p>';
+            }
+        };
+
 
         // Load exercise data from Firestore for the selected exercise
         window.loadExerciseData = (exerciseName) => {
@@ -209,7 +449,7 @@
             }
 
             // Use onSnapshot to listen for real-time updates
-            const exerciseCollectionRef = collection(db, `artifacts/${__app_id}/users/${userId}/exercise_logs`);
+            const exerciseCollectionRef = collection(db, `artifacts/${APP_IDENTIFIER}/users/${userId}/exercise_logs`);
             const q = query(exerciseCollectionRef, where("exerciseName", "==", exerciseName));
 
             onSnapshot(q, (snapshot) => {
@@ -269,7 +509,7 @@
             };
 
             try {
-                const exerciseCollectionRef = collection(db, `artifacts/${__app_id}/users/${userId}/exercise_logs`);
+                const exerciseCollectionRef = collection(db, `artifacts/${APP_IDENTIFIER}/users/${userId}/exercise_logs`);
                 await addDoc(exerciseCollectionRef, newLog);
                 // Clear inputs after successful log
                 document.getElementById('weightInput').value = '';
@@ -277,6 +517,14 @@
                 document.getElementById('setsInput').value = '';
                 // Keep the date selected for convenience
                 showMessage('训练记录成功！');
+
+                // Update last trained muscle group for next suggestion
+                const muscleGroup = getMuscleGroupForExercise(exerciseName);
+                if (muscleGroup) {
+                    await updateLastTrainingInfo(muscleGroup);
+                    displaySuggestedTrainingPlan(); // Refresh suggestion after logging
+                }
+
             } catch (e) {
                 console.error("Error adding document: ", e);
                 showMessage(`记录训练失败: ${e.message}`);
@@ -303,7 +551,7 @@
             document.getElementById('confirmYes').onclick = async () => {
                 confirmBox.classList.add('hidden');
                 try {
-                    const exerciseCollectionRef = collection(db, `artifacts/${__app_id}/users/${userId}/exercise_logs`);
+                    const exerciseCollectionRef = collection(db, `artifacts/${APP_IDENTIFIER}/users/${userId}/exercise_logs`);
                     const q = query(exerciseCollectionRef, where("exerciseName", "==", currentSelectedExercise));
                     const snapshot = await getDocs(q);
 
@@ -495,12 +743,18 @@
             <h2 class="text-secondary text-2xl font-bold border-b-2 border-primary pb-3 mb-4 text-center">身体状况与参数</h2>
             <p class="text-gray-700 mb-2"><strong class="text-secondary">当前体重：</strong> 91.4 kg | <strong class="text-secondary">目标体重：</strong> 69 kg | <strong class="text-secondary">减重目标：</strong> 22.4 kg</p>
             <p class="text-gray-700 mb-2"><strong class="text-secondary">计划周期：</strong> 9-12 个月 | <strong class="text-secondary">每周减重目标：</strong> 0.5-1 kg</p>
-            <p class="text-gray-700"><strong class="text-secondary">训练频率：</strong> 每周 5 天（周一至周五训练，周六非训练，周日放纵）</p>
+            <p class="text-gray-700"><strong class="text-secondary">训练频率：：</strong> 每周 5 天（周一至周五训练，周六非训练，周日放纵）</p>
         </div>
 
         <div class="section mb-8">
             <h2 class="text-secondary text-2xl font-bold border-b-2 border-primary pb-3 mb-4 text-center">每周训练计划</h2>
-            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">星期一（胸部训练）</button>
+            <div id="suggestedTrainingContent" class="bg-card p-4 rounded-lg shadow-md mb-6">
+                <p class="text-gray-600">加载建议训练计划...</p>
+            </div>
+
+            <h2 class="text-secondary text-2xl font-bold border-b-2 border-primary pb-3 mb-4 text-center mt-8">全部训练计划</h2>
+
+            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">胸部训练</button>
             <div class="content overflow-hidden max-h-0 transition-all duration-300 ease-out p-4">
                 <table class="exercise-table w-full border-collapse my-4 rounded-lg overflow-hidden">
                     <thead>
@@ -525,7 +779,7 @@
                 </ul>
             </div>
 
-            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">星期二（背部训练）</button>
+            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">背部训练</button>
             <div class="content overflow-hidden max-h-0 transition-all duration-300 ease-out p-4">
                 <table class="exercise-table w-full border-collapse my-4 rounded-lg overflow-hidden">
                     <thead>
@@ -550,7 +804,7 @@
                 </ul>
             </div>
 
-            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">星期三（肩部训练）</button>
+            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">肩部训练</button>
             <div class="content overflow-hidden max-h-0 transition-all duration-300 ease-out p-4">
                 <table class="exercise-table w-full border-collapse my-4 rounded-lg overflow-hidden">
                     <thead>
@@ -575,7 +829,7 @@
                 </ul>
             </div>
 
-            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">星期四（腿部训练）</button>
+            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">腿部训练</button>
             <div class="content overflow-hidden max-h-0 transition-all duration-300 ease-out p-4">
                 <table class="exercise-table w-full border-collapse my-4 rounded-lg overflow-hidden">
                     <thead>
@@ -600,7 +854,7 @@
                 </ul>
             </div>
 
-            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">星期五（手臂训练）</button>
+            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">手臂训练</button>
             <div class="content overflow-hidden max-h-0 transition-all duration-300 ease-out p-4">
                 <table class="exercise-table w-full border-collapse my-4 rounded-lg overflow-hidden">
                     <thead>
@@ -625,12 +879,12 @@
                 </ul>
             </div>
 
-            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">星期六（非训练日）</button>
+            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">休息日（周六）</button>
             <div class="content overflow-hidden max-h-0 transition-all duration-300 ease-out p-4">
                 <p class="text-gray-700">休息日，可进行轻度拉伸或散步，放松身体。</p>
             </div>
 
-            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">星期日（放纵日）</button>
+            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">放纵日（周日）</button>
             <div class="content overflow-hidden max-h-0 transition-all duration-300 ease-out p-4">
                 <p class="text-gray-700">休息日，享受放纵饮食，无需训练。</p>
             </div>
@@ -689,7 +943,7 @@
             <div class="notes bg-warning p-5 rounded-lg text-gray-800">
                 <p class="mb-2"><strong class="text-secondary">饮水：</strong> 每日 2.5-3 升，训练后淡盐水或椰子水。</p>
                 <p class="mb-2"><strong class="text-secondary">监测：</strong> 定期评估训练效果和身体状况。</p>
-                <p class="mb-2"><strong class="text-secondary">调整：</strong> 若训练停滞，考虑调整训练量、强度或动作。</p>
+                <p class="mb-2"><strong class="text-secondary">调整：：</strong> 若训练停滞，考虑调整训练量、强度或动作。</p>
                 <p><strong class="text-secondary">复查：</strong> 3 个月后测 BMI、尿酸、ALT、血压。</p>
             </div>
         </div>
