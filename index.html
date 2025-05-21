@@ -40,19 +40,19 @@
         // 您可以在 Firebase 项目控制台 -> 项目设置 -> 概览 -> 您的应用 -> Firebase SDK 配置 (Config) 中找到这些信息。
         // 请确保这些值是您从 Firebase 控制台复制的正确值。
         const firebaseConfig = {
-            apiKey: "YOUR_FIREBASE_API_KEY", // <-- 替换为您的 API Key
-            authDomain: "YOUR_FIREBASE_AUTH_DOMAIN", // <-- 替换为您的 Auth Domain
-            projectId: "YOUR_FIREBASE_PROJECT_ID", // <-- 替换为您的 Project ID
-            storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET", // <-- 替换为您的 Storage Bucket
-            messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID", // <-- 替换为您的 Messaging Sender ID
-            // appId: "YOUR_FIREBASE_APP_ID_FROM_CONFIG" // 通常不需要在这里设置，除非您有特殊需求
+            apiKey: "AIzaSyCA4uapYK9QfC_Z-XkDFm69j_EmPGXS4wY", // <-- 替换为您的 API Key
+            authDomain: "felix-plan.firebaseapp.com", // <-- 替换为您的 Auth Domain
+            projectId: "felix-plan", // <-- 替换为您的 Project ID
+            storageBucket: "felix-plan.firebasestorage.app", // <-- 替换为您的 Storage Bucket
+            messagingSenderId: "916234305076", // <-- 替换为您的 Messaging Sender ID
+            // appId: "1:916234305076:web:5f17914d05301b30cd1461" // 通常不需要在这里设置，除非您有特殊需求
         };
 
         // 此自定义应用 ID 用于构建 Firestore 数据路径。
         // 它应该是您此特定部署应用实例的唯一标识符。
         // 对于 Netlify，您可以使用您的 Netlify 站点名称（例如：'my-fitness-app-123'）。
         // 请替换为您的实际应用标识符，例如：'my-personal-fitness-tracker'
-        const APP_IDENTIFIER = "your-unique-app-identifier";
+        const APP_IDENTIFIER = "https://taoplan.netlify.app/";
 
         // Global Firebase variables
         let app;
