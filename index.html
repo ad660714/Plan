@@ -6,25 +6,7 @@
     <title>训练与运动记录</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Responsive video container */
-        .video-responsive {
-            position: relative;
-            padding-bottom: 56.25%; /* 16:9 aspect ratio */
-            height: 0;
-            overflow: hidden;
-            max-width: 100%;
-            background: #000;
-        }
-
-        .video-responsive iframe,
-        .video-responsive object,
-        .video-responsive embed {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
+        /* No video-responsive CSS needed as video functionality is removed */
     </style>
     <script>
         // Configure Tailwind CSS to use Inter font and custom colors if needed
@@ -128,14 +110,15 @@
             }, 3000); // Hide after 3 seconds
         };
 
-        // Populate the exercise dropdown from the HTML tables
-        window.populateExerciseDropdown = () => {
+        // Populate the exercise dropdown from HTML tables and Firestore custom exercises
+        window.populateExerciseDropdown = async () => {
             const exerciseSelect = document.getElementById('exerciseSelect');
             exerciseSelect.innerHTML = '<option value="">请选择一个运动</option>'; // Reset dropdown
 
-            const exerciseTables = document.querySelectorAll('.exercise-table tbody tr');
             const uniqueExercises = new Set();
 
+            // 1. Get exercises from HTML tables
+            const exerciseTables = document.querySelectorAll('.exercise-table tbody tr');
             exerciseTables.forEach(row => {
                 const exerciseName = row.cells[0].textContent.trim().replace('（最佳动作）', '').trim();
                 if (exerciseName) {
@@ -143,6 +126,21 @@
                 }
             });
 
+            // 2. Get custom exercises from Firestore
+            if (db && userId && userId !== 'anonymous') {
+                try {
+                    const customExerciseCollectionRef = collection(db, `artifacts/${__app_id}/users/${userId}/custom_exercises`);
+                    const snapshot = await getDocs(customExerciseCollectionRef);
+                    snapshot.forEach(doc => {
+                        uniqueExercises.add(doc.data().name);
+                    });
+                } catch (e) {
+                    console.error("Error fetching custom exercises:", e);
+                    showMessage(`加载自定义运动失败: ${e.message}`);
+                }
+            }
+
+            // 3. Populate dropdown with combined and sorted unique exercises
             Array.from(uniqueExercises).sort().forEach(exercise => {
                 const option = document.createElement('option');
                 option.value = exercise;
@@ -152,11 +150,51 @@
 
             // Set initial selected exercise if any
             if (uniqueExercises.size > 0) {
-                currentSelectedExercise = exerciseSelect.options[1] ? exerciseSelect.options[1].value : ''; // Select the first available exercise
-                exerciseSelect.value = currentSelectedExercise;
+                // Try to keep the previously selected exercise, otherwise select the first one
+                if (currentSelectedExercise && uniqueExercises.has(currentSelectedExercise)) {
+                    exerciseSelect.value = currentSelectedExercise;
+                } else {
+                    currentSelectedExercise = exerciseSelect.options[1] ? exerciseSelect.options[1].value : '';
+                    exerciseSelect.value = currentSelectedExercise;
+                }
                 loadExerciseData(currentSelectedExercise);
             }
         };
+
+        // Add a custom exercise to Firestore
+        window.addCustomExercise = async () => {
+            const newExerciseInput = document.getElementById('newExerciseInput');
+            const exerciseName = newExerciseInput.value.trim();
+
+            if (!exerciseName) {
+                showMessage('请输入运动名称！');
+                return;
+            }
+            if (!db || !userId || userId === 'anonymous') {
+                showMessage("Firestore未准备好或用户未认证。");
+                return;
+            }
+
+            try {
+                const customExerciseCollectionRef = collection(db, `artifacts/${__app_id}/users/${userId}/custom_exercises`);
+                // Check if exercise already exists to prevent duplicates
+                const q = query(customExerciseCollectionRef, where("name", "==", exerciseName));
+                const snapshot = await getDocs(q);
+                if (!snapshot.empty) {
+                    showMessage(`运动 "${exerciseName}" 已存在！`);
+                    return;
+                }
+
+                await addDoc(customExerciseCollectionRef, { name: exerciseName });
+                newExerciseInput.value = '';
+                showMessage(`运动 "${exerciseName}" 添加成功！`);
+                populateExerciseDropdown(); // Refresh dropdown
+            } catch (e) {
+                console.error("Error adding custom exercise: ", e);
+                showMessage(`添加运动失败: ${e.message}`);
+            }
+        };
+
 
         // Load exercise data from Firestore for the selected exercise
         window.loadExerciseData = (exerciseName) => {
@@ -199,12 +237,17 @@
         // Add exercise log entry to Firestore
         window.addExerciseLog = async () => {
             const exerciseName = document.getElementById('exerciseSelect').value;
+            const trainingDate = document.getElementById('trainingDateInput').value; // Get selected date
             const weightInput = document.getElementById('weightInput').value;
             const repsInput = document.getElementById('repsInput').value;
             const setsInput = document.getElementById('setsInput').value;
 
             if (!exerciseName) {
                 showMessage('请先选择一个运动！');
+                return;
+            }
+            if (!trainingDate) {
+                showMessage('请选择训练日期！');
                 return;
             }
             if (!weightInput || isNaN(weightInput) || !repsInput || isNaN(repsInput) || !setsInput || isNaN(setsInput)) {
@@ -221,16 +264,18 @@
                 weight: parseFloat(weightInput),
                 reps: parseInt(repsInput),
                 sets: parseInt(setsInput),
-                timestamp: Date.now(), // Current timestamp
-                date: new Date().toLocaleDateString('zh-CN') // Current date string
+                timestamp: new Date(trainingDate).getTime(), // Use selected date's timestamp
+                date: trainingDate // Store the selected date string
             };
 
             try {
                 const exerciseCollectionRef = collection(db, `artifacts/${__app_id}/users/${userId}/exercise_logs`);
                 await addDoc(exerciseCollectionRef, newLog);
+                // Clear inputs after successful log
                 document.getElementById('weightInput').value = '';
                 document.getElementById('repsInput').value = '';
                 document.getElementById('setsInput').value = '';
+                // Keep the date selected for convenience
                 showMessage('训练记录成功！');
             } catch (e) {
                 console.error("Error adding document: ", e);
@@ -406,10 +451,21 @@
             }
         };
 
+        // Set today's date to the date input
+        window.setTodayDate = () => {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+            const day = String(today.getDate()).padStart(2, '0');
+            document.getElementById('trainingDateInput').value = `${year}-${month}-${day}`;
+        };
+
+
         // Initialize collapsibles, populate exercises, and chart when the DOM is fully loaded
         document.addEventListener('DOMContentLoaded', () => {
             window.setupCollapsibles();
             window.initializeChart(); // Initialize chart with empty data initially
+            window.setTodayDate(); // Set today's date on load
         });
     </script>
 </head>
@@ -461,10 +517,6 @@
                         <tr class="bg-gray-50 even:bg-gray-100"><td><strong class="text-primary">杠铃卧推（最佳动作）</strong></td><td>4 组 × 8-12 次</td><td>全面胸肌</td></tr>
                     </tbody>
                 </table>
-                <h3 class="text-secondary text-xl font-semibold mt-6 mb-3">动作教学视频</h3>
-                <div class="video-responsive mt-4 rounded-lg overflow-hidden shadow-md">
-                    <iframe src="https://www.youtube.com/embed/j1y_N6g2Z7U" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
                 <h3 class="text-secondary text-xl font-semibold mt-6 mb-3">拉伸</h3>
                 <ul class="list-disc list-inside text-gray-700">
                     <li>门框胸部拉伸 - 双臂撑门框，身体前倾，拉伸胸大肌（20-30秒，2-3次）</li>
@@ -490,10 +542,6 @@
                         <tr class="bg-gray-50 even:bg-gray-100"><td><strong class="text-primary">高位下拉器宽握下拉（最佳动作）</strong></td><td>4 组 × 8-12 次</td><td>背阔肌宽度</td></tr>
                     </tbody>
                 </table>
-                <h3 class="text-secondary text-xl font-semibold mt-6 mb-3">动作教学视频</h3>
-                <div class="video-responsive mt-4 rounded-lg overflow-hidden shadow-md">
-                    <iframe src="https://www.youtube.com/embed/Wb871-q_6h4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
                 <h3 class="text-secondary text-xl font-semibold mt-6 mb-3">拉伸</h3>
                 <ul class="list-disc list-inside text-gray-700">
                     <li>猫式拉伸 - 双手撑地，背部拱起，放松背阔肌（20-30秒，2-3次）</li>
@@ -519,10 +567,6 @@
                         <tr class="bg-gray-50 even:bg-gray-100"><td><strong class="text-primary">史密斯机坐姿推举（最佳动作）</strong></td><td>4 组 × 8-12 次</td><td>三角肌整体</td></tr>
                     </tbody>
                 </table>
-                <h3 class="text-secondary text-xl font-semibold mt-6 mb-3">动作教学视频</h3>
-                <div class="video-responsive mt-4 rounded-lg overflow-hidden shadow-md">
-                    <iframe src="https://www.youtube.com/embed/hJ_1E4-F-38" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
                 <h3 class="text-secondary text-xl font-semibold mt-6 mb-3">拉伸</h3>
                 <ul class="list-disc list-inside text-gray-700">
                     <li>手臂跨胸拉伸 - 一手臂横跨胸前，另一手轻压，拉伸三角肌后束（20-30秒，2-3次）</li>
@@ -548,10 +592,6 @@
                         <tr class="bg-gray-50 even:bg-gray-100"><td><strong class="text-primary">杠铃深蹲（最佳动作）</strong></td><td>4 组 × 8-12 次</td><td>腿部整体</td></tr>
                     </tbody>
                 </table>
-                <h3 class="text-secondary text-xl font-semibold mt-6 mb-3">动作教学视频</h3>
-                <div class="video-responsive mt-4 rounded-lg overflow-hidden shadow-md">
-                    <iframe src="https://www.youtube.com/embed/ultWqW_094U" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
                 <h3 class="text-secondary text-xl font-semibold mt-6 mb-3">拉伸</h3>
                 <ul class="list-disc list-inside text-gray-700">
                     <li>股四头肌拉伸 - 站立，一手拉脚跟至臀部，拉伸大腿前侧（20-30秒，2-3次）</li>
@@ -577,10 +617,6 @@
                         <tr class="bg-gray-50 even:bg-gray-100"><td><strong class="text-primary">杠铃弯举（最佳动作 - 肱二头肌）</strong></td><td>4 组 × 8-12 次</td><td>肱二头肌</td></tr>
                     </tbody>
                 </table>
-                <h3 class="text-secondary text-xl font-semibold mt-6 mb-3">动作教学视频</h3>
-                <div class="video-responsive mt-4 rounded-lg overflow-hidden shadow-md">
-                    <iframe src="https://www.youtube.com/embed/kwG281fW-kE" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
                 <h3 class="text-secondary text-xl font-semibold mt-6 mb-3">拉伸</h3>
                 <ul class="list-disc list-inside text-gray-700">
                     <li>肱二头肌拉伸 - 手臂伸直，手掌朝下靠墙，身体轻转，拉伸二头肌（20-30秒，2-3次）</li>
@@ -626,12 +662,17 @@
             <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">记录与查看训练数据</button>
             <div class="content overflow-hidden max-h-0 transition-all duration-300 ease-out p-4">
                 <div class="exercise-log-input flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-3 my-4">
+                    <input type="date" id="trainingDateInput" class="p-3 border border-border rounded-lg w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-primary">
                     <select id="exerciseSelect" onchange="onExerciseSelectChange()" class="p-3 border border-border rounded-lg w-full sm:w-auto flex-grow focus:outline-none focus:ring-2 focus:ring-primary">
                         </select>
                     <input type="number" id="weightInput" step="0.1" placeholder="重量 (kg)" class="p-3 border border-border rounded-lg w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-primary">
                     <input type="number" id="setsInput" step="1" placeholder="组数" class="p-3 border border-border rounded-lg w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-primary">
                     <input type="number" id="repsInput" step="1" placeholder="次数" class="p-3 border border-border rounded-lg w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-primary">
                     <button onclick="addExerciseLog()" class="bg-primary hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-200 w-full sm:w-auto">记录训练</button>
+                </div>
+                <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-3 my-4">
+                    <input type="text" id="newExerciseInput" placeholder="添加新运动 (如：哑铃飞鸟)" class="p-3 border border-border rounded-lg w-full sm:w-auto flex-grow focus:outline-none focus:ring-2 focus:ring-primary">
+                    <button onclick="addCustomExercise()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-200 w-full sm:w-auto">添加运动</button>
                 </div>
                 <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-3 my-4">
                     <button onclick="exportCurrentExerciseData()" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-200 w-full sm:w-auto">导出当前运动数据</button>
@@ -647,7 +688,7 @@
             <h2 class="text-secondary text-2xl font-bold border-b-2 border-primary pb-3 mb-4 text-center">注意事项</h2>
             <div class="notes bg-warning p-5 rounded-lg text-gray-800">
                 <p class="mb-2"><strong class="text-secondary">饮水：</strong> 每日 2.5-3 升，训练后淡盐水或椰子水。</p>
-                <p class="mb-2"><strong class="text-secondary">监测：：</strong> 定期评估训练效果和身体状况。</p>
+                <p class="mb-2"><strong class="text-secondary">监测：</strong> 定期评估训练效果和身体状况。</p>
                 <p class="mb-2"><strong class="text-secondary">调整：</strong> 若训练停滞，考虑调整训练量、强度或动作。</p>
                 <p><strong class="text-secondary">复查：</strong> 3 个月后测 BMI、尿酸、ALT、血压。</p>
             </div>
