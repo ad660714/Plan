@@ -1,670 +1,266 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>训练与运动记录</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* No video-responsive CSS needed as video functionality is removed */
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h3 { color: #333; }
+        table { border-collapse: collapse; margin: 10px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        button { margin: 5px; padding: 5px 10px; }
+        #recordDisplay { margin-top: 10px; }
     </style>
-    <script>
-        // Configure Tailwind CSS to use Inter font and custom colors if needed
-        // IMPORTANT: This block must be AFTER the Tailwind CSS CDN script.
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: '#3498db', // A primary blue for accents
-                        secondary: '#2c3e50', // Dark blue for headings
-                        background: '#f0f4f8', // Light grey background
-                        card: '#ffffff', // White for cards
-                        border: '#e0e0e0', // Light grey for borders
-                        accent: '#ecf0f1', // Light grey for collapsible background
-                        warning: '#fff3e0', // Light orange for notes
-                    }
-                }
-            }
-        }
-    </script>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, addDoc, deleteDoc, onSnapshot, collection, query, where, getDocs, setDoc, doc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- Firebase Configuration (for Netlify Deployment) ---
-        // IMPORTANT: 请再次仔细检查并将以下占位符替换为您的实际 Firebase 项目配置。
-        // 确保这些值与您 Firebase 控制台中的值完全一致，包括大小写和特殊字符。
-        const firebaseConfig = {
-            apiKey: "AIzaSyCA4uapYK9QfC_Z-XkDFm69j_EmPGXS4wY", // <-- 替换为您的 API Key
-            authDomain: "felix-plan.firebaseapp.com", // <-- 替换为您的 Auth Domain
-            projectId: "felix-plan", // <-- 替换为您的 Project ID
-            storageBucket: "felix-plan.firebasestorage.app", // <-- 替换为您的 Storage Bucket
-            messagingSenderId: "916234305076", // <-- 替换为您的 Messaging Sender ID
-            appId: "1:916234305076:web:5f17914d05301b30cd1461" // <-- 确保这也是从Firebase控制台复制的 (可选，但建议包含)
-        };
-        console.log("Firebase Config (原始):", JSON.parse(JSON.stringify(firebaseConfig))); // 打印原始配置以检查
-
-        // 此自定义应用 ID 用于构建 Firestore 数据路径。
-        // 建议使用一个不包含末尾斜杠的简洁标识符。
-        const APP_IDENTIFIER = "taoplan-netlify-app";
-        console.log("APP_IDENTIFIER:", APP_IDENTIFIER);
-
-        // Global Firebase variables
-        let app;
-        let db;
-        let auth;
-        let userId = 'anonymous'; // Default to anonymous
-        let currentSelectedExercise = ''; // To store the currently selected exercise for logging and charting
-
-        // Define a mapping of exercises to their muscle groups
-        const exerciseToMuscleGroupMap = {
-            '哑铃上斜推': '胸部训练', '史密斯机下斜推': '胸部训练', '蝴蝶机夹胸': '胸部训练', '杠铃卧推': '胸部训练',
-            '龙门架单臂绳索划船': '背部训练', '哑铃单臂划船': '背部训练', '杠铃俯身划船': '背部训练', '高位下拉器宽握下拉': '背部训练',
-            '哑铃侧平举': '肩部训练', '龙门架绳索面拉': '肩部训练', '杠铃前平举': '肩部训练', '史密斯机坐姿推举': '肩部训练',
-            '史密斯机弓步': '腿部训练', '腿伸展器': '腿部训练', '龙门架绳索臀推': '腿部训练', '杠铃深蹲': '腿部训练',
-            '哑铃锤式弯举': '手臂训练', '史密斯机窄握推胸': '手臂训练', '龙门架绳索下压': '手臂训练', '杠铃弯举': '手臂训练'
-        };
-
-        const trainingSequence = ['胸部训练', '背部训练', '肩部训练', '腿部训练', '手臂训练'];
-        const fullTrainingPlans = { /* ... 您的训练计划数据 ... */
-            '胸部训练': {
-                exercises: [
-                    { name: '哑铃上斜推', setsReps: '4 组 × 10-12 次', target: '胸部上缘' },
-                    { name: '史密斯机下斜推', setsReps: '4 组 × 8-12 次', target: '胸部下缘' },
-                    { name: '蝴蝶机夹胸', setsReps: '4 组 × 12-15 次', target: '胸大肌内侧' },
-                    { name: '杠铃卧推', setsReps: '4 组 × 8-12 次', target: '全面胸肌', best: true }
-                ],
-                stretches: [
-                    '门框胸部拉伸 - 双臂撑门框，身体前倾，拉伸胸大肌（20-30秒，2-3次）',
-                    '手臂后拉伸 - 一手抓住另一侧手臂，向后拉，放松胸部和肩前（20-30秒，2-3次）',
-                    '跪姿胸椎伸展 - 跪地，双手前伸，胸部下沉，拉伸胸肌和背部（20-30秒，2-3次）'
-                ]
-            },
-            '背部训练': {
-                exercises: [
-                    { name: '龙门架单臂绳索划船', setsReps: '每侧 4 组 × 10-12 次', target: '背部细节' },
-                    { name: '哑铃单臂划船', setsReps: '每侧 4 组 × 10-12 次', target: '背阔肌和斜方肌' },
-                    { name: '杠铃俯身划船', setsReps: '4 组 × 8-10 次', target: '背部厚度' },
-                    { name: '高位下拉器宽握下拉', setsReps: '4 组 × 8-12 次', target: '背阔肌宽度', best: true }
-                ],
-                stretches: [
-                    '猫式拉伸 - 双手撑地，背部拱起，放松背阔肌（20-30秒，2-3次）',
-                    '侧身拉伸 - 站立，一手向上伸展并侧倾，拉伸背侧（20-30秒，2-3次）',
-                    '手臂交叉拉伸 - 双臂交叉于胸前，一手拉另一手臂，放松上背（20-30秒，2-3次）'
-                ]
-            },
-            '肩部训练': {
-                exercises: [
-                    { name: '哑铃侧平举', setsReps: '4 组 × 12-15 次', target: '三角肌中束' },
-                    { name: '龙门架绳索面拉', setsReps: '4 组 × 12-15 次', target: '三角肌后束' },
-                    { name: '杠铃前平举', setsReps: '4 组 × 10-12 次', target: '三角肌前束' },
-                    { name: '史密斯机坐姿推举', setsReps: '4 组 × 8-12 次', target: '三角肌整体', best: true }
-                ],
-                stretches: [
-                    '手臂跨胸拉伸 - 一手臂横跨胸前，另一手轻压，拉伸三角肌后束（20-30秒，2-3次）',
-                    '肩部后拉 - 双手背后相握，向后拉，打开肩前（20-30秒，2-3次）',
-                    '颈部侧拉 - 一手拉头部向一侧，放松斜方肌和肩部（20-30秒，2-3次）'
-                ]
-            },
-            '腿部训练': {
-                exercises: [
-                    { name: '史密斯机弓步', setsReps: '每侧 4 组 × 10-12 次', target: '单腿力量' },
-                    { name: '腿伸展器', setsReps: '4 组 × 12-15 次', target: '股四头肌' },
-                    { name: '龙门架绳索臀推', setsReps: '4 组 × 12-15 次', target: '臀大肌和腘绳肌' },
-                    { name: '杠铃深蹲', setsReps: '4 组 × 8-12 次', target: '腿部整体', best: true }
-                ],
-                stretches: [
-                    '股四头肌拉伸 - 站立，一手拉脚跟至臀部，拉伸大腿前侧（20-30秒，2-3次）',
-                    '腘绳肌拉伸 - 坐地，一腿伸直，身体前倾，拉伸腿后侧（20-30秒，2-3次）',
-                    '臀部拉伸 - 坐姿，一腿交叉于另一腿上，身体前倾，拉伸臀肌（20-30秒，2-3次）'
-                ]
-            },
-            '手臂训练': {
-                exercises: [
-                    { name: '哑铃锤式弯举', setsReps: '4 组 × 10-12 次', target: '肱肌和前臂' },
-                    { name: '史密斯机窄握推胸', setsReps: '4 组 × 8-12 次', target: '肱三头肌' },
-                    { name: '龙门架绳索下压', setsReps: '4 组 × 12-15 次', target: '肱三头肌', best: true },
-                    { name: '杠铃弯举', setsReps: '4 组 × 8-12 次', target: '肱二头肌', best: true }
-                ],
-                stretches: [
-                    '肱二头肌拉伸 - 手臂伸直，手掌朝下靠墙，身体轻转，拉伸二头肌（20-30秒，2-3次）',
-                    '肱三头肌拉伸 - 一手弯曲过头顶，另一手轻压肘部，拉伸三头肌（20-30秒，2-3次）',
-                    '前臂拉伸 - 一手拉另一手手指向后，拉伸前臂肌群（20-30秒，2-3次）'
-                ]
-            }
-        };
-
-        // Helper function to get a cleaned app identifier for path construction
-        const getCleanAppIdentifier = () => {
-            return APP_IDENTIFIER.replace(/\/*$/, ''); // Remove any trailing slashes
-        };
-
-        // Initialize Firebase and authenticate
-        window.initFirebase = async () => {
-            console.log("Attempting Firebase initialization...");
-            try {
-                if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY" ||
-                    !firebaseConfig.projectId || firebaseConfig.projectId === "YOUR_PROJECT_ID") {
-                    const errorMsg = "Firebase config is incomplete or uses placeholder values. Please update firebaseConfig with your actual project details.";
-                    console.error(errorMsg, firebaseConfig);
-                    showMessage("Firebase配置不完整或使用了占位符，请更新项目详情。");
-                    document.getElementById('userIdDisplay').textContent = 'Firebase 配置错误';
-                    document.getElementById('suggestedTrainingContent').innerHTML = '<p class="text-red-500">Firebase 配置错误，无法加载数据。</p>';
-                    return;
-                }
-                console.log("Firebase config seems populated. Proceeding with initialization.");
-                setLogLevel('debug');
-                console.log("Calling initializeApp with config:", JSON.parse(JSON.stringify(firebaseConfig)));
-                app = initializeApp(firebaseConfig);
-                console.log("initializeApp successful. App object:", app);
-                console.log("Calling getFirestore...");
-                db = getFirestore(app);
-                console.log("getFirestore successful. DB object:", db);
-                console.log("Calling getAuth...");
-                auth = getAuth(app);
-                console.log("getAuth successful. Auth object:", auth);
-                console.log("Attempting to sign in anonymously...");
-                await signInAnonymously(auth);
-                console.log("Signed in anonymously successfully.");
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        console.log("Auth state changed. User ID:", userId);
-                        document.getElementById('userIdDisplay').textContent = `用户ID: ${userId}`;
-                        populateExerciseDropdown();
-                        displaySuggestedTrainingPlan();
-                    } else {
-                        userId = 'anonymous';
-                        document.getElementById('userIdDisplay').textContent = `用户ID: ${userId} (匿名状态异常)`;
-                        console.warn("Auth state changed to no user, but anonymous sign-in was attempted.");
-                        exerciseLogs = [];
-                        updateChart();
-                        document.getElementById('suggestedTrainingContent').innerHTML = '<p class="text-gray-600">用户未登录，无法查看建议训练计划。</p>';
-                    }
-                });
-
-            } catch (error) {
-                console.error("Firebase Initialization or Authentication Error:", error);
-                console.error("Error Name:", error.name);
-                console.error("Error Message:", error.message);
-                console.error("Error Code (if available):", error.code);
-                console.error("Full Error Object:", error);
-                showMessage(`Firebase初始化或认证失败: ${error.code} - ${error.message}`);
-                document.getElementById('userIdDisplay').textContent = `Firebase 错误: ${error.code}`;
-                document.getElementById('suggestedTrainingContent').innerHTML = `<p class="text-red-500">Firebase 初始化失败: ${error.message}。请检查控制台获取更多信息。</p>`;
-            }
-        };
-
-        window.addEventListener('load', window.initFirebase);
-
-        window.showMessage = (message) => {
-            const messageBox = document.getElementById('messageBox');
-            const messageText = document.getElementById('messageText');
-            if (messageBox && messageText) {
-                messageBox.classList.remove('hidden');
-                messageText.textContent = message;
-                setTimeout(() => { messageBox.classList.add('hidden'); }, 3000);
-            } else {
-                console.warn("showMessage: messageBox or messageText element not found.");
-            }
-        };
-
-        function getMuscleGroupForExercise(exerciseName) {
-            return exerciseToMuscleGroupMap[exerciseName] || '自定义训练';
-        }
-
-        window.populateExerciseDropdown = async () => {
-            const exerciseSelect = document.getElementById('exerciseSelect');
-            if (!exerciseSelect) return;
-            exerciseSelect.innerHTML = '<option value="">请选择一个运动</option>';
-            const uniqueExercises = new Set();
-
-            for (const muscleGroup in fullTrainingPlans) {
-                fullTrainingPlans[muscleGroup].exercises.forEach(ex => uniqueExercises.add(ex.name));
-            }
-
-            if (db && userId && userId !== 'anonymous') {
-                try {
-                    // Use cleaned APP_IDENTIFIER for path construction
-                    const customExerciseCollectionRef = collection(db, `artifacts/${getCleanAppIdentifier()}/users/${userId}/custom_exercises`);
-                    const snapshot = await getDocs(customExerciseCollectionRef);
-                    snapshot.forEach(doc => {
-                        const customExerciseName = doc.data().name;
-                        uniqueExercises.add(customExerciseName);
-                        if (!exerciseToMuscleGroupMap[customExerciseName]) {
-                            exerciseToMuscleGroupMap[customExerciseName] = '自定义训练';
-                        }
-                    });
-                } catch (e) {
-                    console.error("Error fetching custom exercises:", e);
-                    showMessage(`加载自定义运动失败: ${e.message}`);
-                }
-            }
-
-            Array.from(uniqueExercises).sort().forEach(exercise => {
-                const option = document.createElement('option');
-                option.value = exercise;
-                option.textContent = exercise;
-                exerciseSelect.appendChild(option);
-            });
-
-            if (uniqueExercises.size > 0) {
-                if (currentSelectedExercise && uniqueExercises.has(currentSelectedExercise)) {
-                    exerciseSelect.value = currentSelectedExercise;
-                } else {
-                    currentSelectedExercise = exerciseSelect.options[1] ? exerciseSelect.options[1].value : '';
-                    exerciseSelect.value = currentSelectedExercise;
-                }
-                loadExerciseData(currentSelectedExercise);
-            }
-        };
-
-        window.addCustomExercise = async () => {
-            const newExerciseInput = document.getElementById('newExerciseInput');
-            const exerciseName = newExerciseInput.value.trim();
-
-            if (!exerciseName) { showMessage('请输入运动名称！'); return; }
-            if (!db || !userId || userId === 'anonymous') { showMessage("Firestore未准备好或用户未认证。"); return; }
-
-            try {
-                 // Use cleaned APP_IDENTIFIER for path construction
-                const customExerciseCollectionRef = collection(db, `artifacts/${getCleanAppIdentifier()}/users/${userId}/custom_exercises`);
-                const q = query(customExerciseCollectionRef, where("name", "==", exerciseName));
-                const snapshot = await getDocs(q);
-                if (!snapshot.empty) { showMessage(`运动 "${exerciseName}" 已存在！`); return; }
-
-                await addDoc(customExerciseCollectionRef, { name: exerciseName });
-                newExerciseInput.value = '';
-                showMessage(`运动 "${exerciseName}" 添加成功！`);
-                populateExerciseDropdown();
-            } catch (e) {
-                console.error("Error adding custom exercise: ", e);
-                showMessage(`添加运动失败: ${e.message}`);
-            }
-        };
-
-        async function fetchLastTrainingInfo() {
-            if (!db || !userId || userId === 'anonymous') return null;
-            try {
-                 // Use cleaned APP_IDENTIFIER for path construction
-                const lastTrainingDocRef = doc(db, `artifacts/${getCleanAppIdentifier()}/users/${userId}/app_state/last_training_info`);
-                const docSnap = await getDoc(lastTrainingDocRef);
-                return docSnap.exists() ? docSnap.data() : null;
-            } catch (e) { console.error("Error fetching last training info:", e); return null; }
-        }
-
-        async function updateLastTrainingInfo(muscleGroup) {
-            if (!db || !userId || userId === 'anonymous' || !muscleGroup) return;
-            try {
-                // Use cleaned APP_IDENTIFIER for path construction
-                const lastTrainingDocRef = doc(db, `artifacts/${getCleanAppIdentifier()}/users/${userId}/app_state/last_training_info`);
-                await setDoc(lastTrainingDocRef, {
-                    lastTrainedDate: new Date().toLocaleDateString('zh-CN'),
-                    lastTrainedMuscleGroup: muscleGroup,
-                    timestamp: Date.now()
-                });
-                console.log("Last training info updated:", muscleGroup);
-            } catch (e) { console.error("Error updating last training info:", e); }
-        }
-
-        window.displaySuggestedTrainingPlan = async () => {
-            const suggestedTrainingContentDiv = document.getElementById('suggestedTrainingContent');
-            if (!suggestedTrainingContentDiv) return;
-            if (!db || !userId || userId === 'anonymous') {
-                suggestedTrainingContentDiv.innerHTML = '<p class="text-gray-600">请登录以查看您的建议训练计划。</p>';
-                return;
-            }
-            let suggestedMuscleGroup = trainingSequence[0];
-            const lastTrainingInfo = await fetchLastTrainingInfo();
-            if (lastTrainingInfo && lastTrainingInfo.lastTrainedMuscleGroup) {
-                const lastIndex = trainingSequence.indexOf(lastTrainingInfo.lastTrainedMuscleGroup);
-                if (lastIndex !== -1) {
-                    suggestedMuscleGroup = trainingSequence[(lastIndex + 1) % trainingSequence.length];
-                }
-            }
-            const plan = fullTrainingPlans[suggestedMuscleGroup];
-            if (plan) {
-                let html = `<h3 class="text-secondary text-xl font-bold mb-3">今日建议训练：${suggestedMuscleGroup}</h3>`;
-                html += `<table class="exercise-table w-full border-collapse my-4 rounded-lg overflow-hidden"><thead><tr class="bg-primary text-white"><th class="p-3 text-left border border-primary">动作</th><th class="p-3 text-left border border-primary">组数与次数</th><th class="p-3 text-left border border-primary">目标肌群</th></tr></thead><tbody>`;
-                plan.exercises.forEach(ex => { html += `<tr class="bg-gray-50 even:bg-gray-100"><td>${ex.best ? `<strong class="text-primary">${ex.name}</strong>` : ex.name}</td><td>${ex.setsReps}</td><td>${ex.target}</td></tr>`; });
-                html += `</tbody></table><h3 class="text-secondary text-xl font-semibold mt-6 mb-3">拉伸</h3><ul class="list-disc list-inside text-gray-700">`;
-                plan.stretches.forEach(stretch => { html += `<li>${stretch}</li>`; });
-                html += `</ul>`;
-                suggestedTrainingContentDiv.innerHTML = html;
-                const exerciseSelect = document.getElementById('exerciseSelect');
-                if (exerciseSelect) {
-                    const firstSuggestedExercise = plan.exercises[0] ? plan.exercises[0].name : '';
-                    if (exerciseSelect.querySelector(`option[value="${firstSuggestedExercise}"]`)) {
-                        exerciseSelect.value = firstSuggestedExercise;
-                        currentSelectedExercise = firstSuggestedExercise;
-                        loadExerciseData(firstSuggestedExercise);
-                    } else if (exerciseSelect.options.length > 1) {
-                        exerciseSelect.value = exerciseSelect.options[1].value;
-                        currentSelectedExercise = exerciseSelect.options[1].value;
-                        loadExerciseData(exerciseSelect.options[1].value);
-                    }
-                }
-            } else {
-                suggestedTrainingContentDiv.innerHTML = '<p class="text-gray-600">无法加载建议训练计划。</p>';
-            }
-        };
-
-        let exerciseLogs = [];
-        let exerciseChartInstance;
-
-        window.loadExerciseData = (exerciseName) => {
-            if (!db || !userId || userId === 'anonymous' || !exerciseName) {
-                if (!exerciseName) { exerciseLogs = []; updateChart(); }
-                return;
-            }
-            // Use cleaned APP_IDENTIFIER for path construction
-            const exerciseCollectionRef = collection(db, `artifacts/${getCleanAppIdentifier()}/users/${userId}/exercise_logs`);
-            const q = query(exerciseCollectionRef, where("exerciseName", "==", exerciseName));
-            onSnapshot(q, (snapshot) => {
-                const fetchedData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                exerciseLogs = fetchedData.sort((a, b) => a.timestamp - b.timestamp);
-                updateChart();
-                console.log(`Exercise data for ${exerciseName} loaded:`, exerciseLogs);
-            }, (error) => {
-                console.error("Error fetching exercise data:", error);
-                showMessage(`加载运动数据失败: ${error.message}`);
-            });
-        };
-
-        window.onExerciseSelectChange = () => {
-            currentSelectedExercise = document.getElementById('exerciseSelect').value;
-            loadExerciseData(currentSelectedExercise);
-        };
-
-        window.addExerciseLog = async () => {
-            const exerciseName = document.getElementById('exerciseSelect').value;
-            const trainingDate = document.getElementById('trainingDateInput').value;
-            const weightInput = document.getElementById('weightInput').value;
-            const repsInput = document.getElementById('repsInput').value;
-            const setsInput = document.getElementById('setsInput').value;
-
-            if (!exerciseName) { showMessage('请先选择一个运动！'); return; }
-            if (!trainingDate) { showMessage('请选择训练日期！'); return; }
-            if (!weightInput || isNaN(weightInput) || !repsInput || isNaN(repsInput) || !setsInput || isNaN(setsInput)) {
-                showMessage('请输入有效的重量、组数和次数！'); return;
-            }
-            if (!db || !userId || userId === 'anonymous') { showMessage("Firestore未准备好或用户未认证。"); return; }
-
-            const newLog = {
-                exerciseName: exerciseName, weight: parseFloat(weightInput),
-                reps: parseInt(repsInput), sets: parseInt(setsInput),
-                timestamp: new Date(trainingDate).getTime(), date: trainingDate
-            };
-            try {
-                // Use cleaned APP_IDENTIFIER for path construction
-                const exerciseCollectionRef = collection(db, `artifacts/${getCleanAppIdentifier()}/users/${userId}/exercise_logs`);
-                await addDoc(exerciseCollectionRef, newLog);
-                document.getElementById('weightInput').value = '';
-                document.getElementById('repsInput').value = '';
-                document.getElementById('setsInput').value = '';
-                showMessage('训练记录成功！');
-                const muscleGroup = getMuscleGroupForExercise(exerciseName);
-                if (muscleGroup) {
-                    await updateLastTrainingInfo(muscleGroup);
-                    displaySuggestedTrainingPlan();
-                }
-            } catch (e) {
-                console.error("Error adding document: ", e);
-                showMessage(`记录训练失败: ${e.message}`);
-            }
-        };
-
-        window.clearCurrentExerciseData = async () => {
-            if (!db || !userId || userId === 'anonymous') { showMessage("Firestore未准备好或用户未认证。"); return; }
-            if (!currentSelectedExercise) { showMessage('请选择一个运动来清除数据！'); return; }
-
-            const confirmBox = document.getElementById('confirmBox');
-            const confirmMessage = document.getElementById('confirmMessage');
-            confirmMessage.textContent = `确定要清除运动 "${currentSelectedExercise}" 的所有数据吗？此操作不可逆。`;
-            confirmBox.classList.remove('hidden');
-
-            document.getElementById('confirmYes').onclick = async () => {
-                confirmBox.classList.add('hidden');
-                try {
-                    // Use cleaned APP_IDENTIFIER for path construction
-                    const exerciseCollectionRef = collection(db, `artifacts/${getCleanAppIdentifier()}/users/${userId}/exercise_logs`);
-                    const q = query(exerciseCollectionRef, where("exerciseName", "==", currentSelectedExercise));
-                    const snapshot = await getDocs(q);
-                    if (snapshot.empty) { showMessage("没有数据可以清除。"); return; }
-                    const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
-                    await Promise.all(deletePromises);
-                    showMessage(`运动 "${currentSelectedExercise}" 的所有数据已清除。`);
-                } catch (e) {
-                    console.error("Error clearing documents: ", e);
-                    showMessage(`清除数据失败: ${e.message}`);
-                }
-            };
-            document.getElementById('confirmNo').onclick = () => {
-                confirmBox.classList.add('hidden');
-                showMessage('已取消清除操作。');
-            };
-        };
-
-        window.exportCurrentExerciseData = () => { /* ... unchanged ... */ };
-        window.initializeChart = () => { /* ... unchanged ... */ };
-        window.updateChart = () => { /* ... unchanged ... */ };
-        window.setupCollapsibles = () => { /* ... unchanged ... */ };
-        window.setTodayDate = () => { /* ... unchanged ... */ };
-
-        document.addEventListener('DOMContentLoaded', () => {
-            window.setupCollapsibles();
-            window.initializeChart();
-            window.setTodayDate();
-        });
-    </script>
 </head>
-<body class="font-sans bg-background p-4 sm:p-6 md:p-8">
-    <div class="container max-w-4xl mx-auto bg-card p-5 sm:p-8 rounded-xl shadow-lg">
-        <h1 class="text-secondary text-3xl sm:text-4xl font-extrabold text-center mb-6">训练与运动记录</h1>
+<body>
+    <h1>训练与运动记录</h1>
+    <p>正在加载用户ID...</p>
 
-        <div class="text-center text-sm text-gray-600 mb-4" id="userIdDisplay">
-            正在加载用户ID...
-        </div>
+    <h3>是否开始训练计划</h3>
+    <label><input type="radio" name="startPlan" value="yes"> 是</label>
+    <label><input type="radio" name="startPlan" value="no"> 否</label>
 
-        <div id="messageBox" class="hidden fixed top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-6 py-3 rounded-lg shadow-xl z-50 transition-all duration-300 ease-in-out">
-            <span id="messageText"></span>
-        </div>
+    <h3>身体状况与参数</h3>
+    <p>当前体重： 91.4 kg | 目标体重： 69 kg | 减重目标： 22.4 kg</p>
+    <p>计划周期： 9-12 个月 | 每周减重目标： 0.5-1 kg</p>
+    <p>训练频率： 每周 5 天（周一至周五训练，周六非训练，周日放纵）</p>
 
-        <div id="confirmBox" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full text-center">
-                <p id="confirmMessage" class="text-lg font-semibold mb-6 text-secondary"></p>
-                <div class="flex justify-center space-x-4">
-                    <button id="confirmYes" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition duration-200">是</button>
-                    <button id="confirmNo" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg transition duration-200">否</button>
-                </div>
-            </div>
-        </div>
+    <h3>每周训练计划</h3>
+    <div id="weekly-plan">
+        加载建议训练计划...
+    </div>
 
-        <div class="section mb-8">
-            <h2 class="text-secondary text-2xl font-bold border-b-2 border-primary pb-3 mb-4 text-center">身体状况与参数</h2>
-            <p class="text-gray-700 mb-2"><strong class="text-secondary">当前体重：</strong> 91.4 kg | <strong class="text-secondary">目标体重：</strong> 69 kg | <strong class="text-secondary">减重目标：</strong> 22.4 kg</p>
-            <p class="text-gray-700 mb-2"><strong class="text-secondary">计划周期：</strong> 9-12 个月 | <strong class="text-secondary">每周减重目标：</strong> 0.5-1 kg</p>
-            <p class="text-gray-700"><strong class="text-secondary">训练频率：</strong> 每周 5 天（周一至周五训练，周六非训练，周日放纵）</p>
-        </div>
+    <div id="all-plans" style="display: none;">
+        <h4>胸部训练</h4>
+        <table>
+            <tr><th>动作</th><th>组数与次数</th><th>目标肌群</th></tr>
+            <tr><td data-details="哑铃上斜推：仰卧在倾斜凳上，双手持哑铃向上推举，注意控制动作幅度。" onclick="showDetail(this)">哑铃上斜推</td><td>4 组 × 10-12 次</td><td>胸部上缘</td></tr>
+            <tr><td data-details="史密斯机下斜推：使用史密斯机，下斜角度推举，注重胸下部发力。" onclick="showDetail(this)">史密斯机下斜推</td><td>4 组 × 8-12 次</td><td>胸部下缘</td></tr>
+            <tr><td data-details="蝴蝶机夹胸：坐在蝴蝶机上，双手向中间夹合，注重内侧胸肌。" onclick="showDetail(this)">蝴蝶机夹胸</td><td>4 组 × 12-15 次</td><td>胸大肌内侧</td></tr>
+            <tr><td data-details="杠铃卧推：平卧推举杠铃，全面刺激胸肌，注意安全。" onclick="showDetail(this)">杠铃卧推（最佳动作）</td><td>4 组 × 8-12 次</td><td>全面胸肌</td></tr>
+        </table>
+        <h5>拉伸</h5>
+        <ul>
+            <li>门框胸部拉伸 - 双臂撑门框，身体前倾，拉伸胸大肌（20-30秒，2-3次）</li>
+            <li>手臂后拉伸 - 一手抓住另一侧手臂，向后拉，放松胸部和肩前（20-30秒，2-3次）</li>
+            <li>跪姿胸椎伸展 - 跪地，双手前伸，胸部下沉，拉伸胸肌和背部（20-30秒，2-3次）</li>
+        </ul>
 
-        <div class="section mb-8">
-            <h2 class="text-secondary text-2xl font-bold border-b-2 border-primary pb-3 mb-4 text-center">每周训练计划</h2>
-            <div id="suggestedTrainingContent" class="bg-card p-4 rounded-lg shadow-md mb-6">
-                <p class="text-gray-600">加载建议训练计划...</p>
-            </div>
+        <h4>背部训练</h4>
+        <table>
+            <tr><th>动作</th><th>组数与次数</th><th>目标肌群</th></tr>
+            <tr><td data-details="龙门架单臂绳索划船：单臂拉绳索，注重背部细节。" onclick="showDetail(this)">龙门架单臂绳索划船</td><td>每侧 4 组 × 10-12 次</td><td>背部细节</td></tr>
+            <tr><td data-details="哑铃单臂划船：单手撑地，另一手划船，强化背阔肌。" onclick="showDetail(this)">哑铃单臂划船</td><td>每侧 4 组 × 10-12 次</td><td>背阔肌和斜方肌</td></tr>
+            <tr><td data-details="杠铃俯身划船：俯身拉杠铃，增加背部厚度。" onclick="showDetail(this)">杠铃俯身划船</td><td>4 组 × 8-10 次</td><td>背部厚度</td></tr>
+            <tr><td data-details="高位下拉器宽握下拉：宽握下拉，扩展背阔肌。" onclick="showDetail(this)">高位下拉器宽握下拉（最佳动作）</td><td>4 组 × 8-12 次</td><td>背阔肌宽度</td></tr>
+        </table>
+        <h5>拉伸</h5>
+        <ul>
+            <li>猫式拉伸 - 双手撑地，背部拱起，放松背阔肌（20-30秒，2-3次）</li>
+            <li>侧身拉伸 - 站立，一手向上伸展并侧倾，拉伸背侧（20-30秒，2-3次）</li>
+            <li>手臂交叉拉伸 - 双臂交叉于胸前，一手拉另一手臂，放松上背（20-30秒，2-3次）</li>
+        </ul>
 
-            <h2 class="text-secondary text-2xl font-bold border-b-2 border-primary pb-3 mb-4 text-center mt-8">全部训练计划</h2>
+        <h4>肩部训练</h4>
+        <table>
+            <tr><th>动作</th><th>组数与次数</th><th>目标肌群</th></tr>
+            <tr><td data-details="哑铃侧平举：双手持哑铃侧举，强化三角肌中束。" onclick="showDetail(this)">哑铃侧平举</td><td>4 组 × 12-15 次</td><td>三角肌中束</td></tr>
+            <tr><td data-details="龙门架绳索面拉：拉绳索至脸部，针对后束。" onclick="showDetail(this)">龙门架绳索面拉</td><td>4 组 × 12-15 次</td><td>三角肌后束</td></tr>
+            <tr><td data-details="杠铃前平举：前举杠铃，锻炼前束。" onclick="showDetail(this)">杠铃前平举</td><td>4 组 × 10-12 次</td><td>三角肌前束</td></tr>
+            <tr><td data-details="史密斯机坐姿推举：坐姿推举，全面刺激三角肌。" onclick="showDetail(this)">史密斯机坐姿推举（最佳动作）</td><td>4 组 × 8-12 次</td><td>三角肌整体</td></tr>
+        </table>
+        <h5>拉伸</h5>
+        <ul>
+            <li>手臂跨胸拉伸 - 一手臂横跨胸前，另一手轻压，拉伸三角肌后束（20-30秒，2-3次）</li>
+            <li>肩部后拉 - 双手背后相握，向后拉，打开肩前（20-30秒，2-3次）</li>
+            <li>颈部侧拉 - 一手拉头部向一侧，放松斜方肌和肩部（20-30秒，2-3次）</li>
+        </ul>
 
-            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">胸部训练</button>
-            <div class="content overflow-hidden max-h-0 transition-all duration-300 ease-out p-4">
-                <table class="exercise-table w-full border-collapse my-4 rounded-lg overflow-hidden">
-                    <thead><tr class="bg-primary text-white"><th class="p-3 text-left border border-primary">动作</th><th class="p-3 text-left border border-primary">组数与次数</th><th class="p-3 text-left border border-primary">目标肌群</th></tr></thead>
-                    <tbody>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td>哑铃上斜推</td><td>4 组 × 10-12 次</td><td>胸部上缘</td></tr>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td>史密斯机下斜推</td><td>4 组 × 8-12 次</td><td>胸部下缘</td></tr>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td>蝴蝶机夹胸</td><td>4 组 × 12-15 次</td><td>胸大肌内侧</td></tr>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td><strong class="text-primary">杠铃卧推（最佳动作）</strong></td><td>4 组 × 8-12 次</td><td>全面胸肌</td></tr>
-                    </tbody>
-                </table>
-                <h3 class="text-secondary text-xl font-semibold mt-6 mb-3">拉伸</h3>
-                <ul class="list-disc list-inside text-gray-700">
-                    <li>门框胸部拉伸 - 双臂撑门框，身体前倾，拉伸胸大肌（20-30秒，2-3次）</li>
-                    <li>手臂后拉伸 - 一手抓住另一侧手臂，向后拉，放松胸部和肩前（20-30秒，2-3次）</li>
-                    <li>跪姿胸椎伸展 - 跪地，双手前伸，胸部下沉，拉伸胸肌和背部（20-30秒，2-3次）</li>
+        <h4>腿部训练</h4>
+        <table>
+            <tr><th>动作</th><th>组数与次数</th><th>目标肌群</th></tr>
+            <tr><td data-details="史密斯机弓步：单腿弓步，增强力量。" onclick="showDetail(this)">史密斯机弓步</td><td>每侧 4 组 × 10-12 次</td><td>单腿力量</td></tr>
+            <tr><td data-details="腿伸展器：坐姿伸腿，强化股四头肌。" onclick="showDetail(this)">腿伸展器</td><td>4 组 × 12-15 次</td><td>股四头肌</td></tr>
+            <tr><td data-details="龙门架绳索臀推：推绳索，锻炼臀部和腘绳肌。" onclick="showDetail(this)">龙门架绳索臀推</td><td>4 组 × 12-15 次</td><td>臀大肌和腘绳肌</td></tr>
+            <tr><td data-details="杠铃深蹲：深蹲杠铃，全面训练腿部。" onclick="showDetail(this)">杠铃深蹲（最佳动作）</td><td>4 组 × 8-12 次</td><td>腿部整体</td></tr>
+        </table>
+        <h5>拉伸</h5>
+        <ul>
+            <li>股四头肌拉伸 - 站立，一手拉脚跟至臀部，拉伸大腿前侧（20-30秒，2-3次）</li>
+            <li>腘绳肌拉伸 - 坐地，一腿伸直，身体前倾，拉伸腿后侧（20-30秒，2-3次）</li>
+            <li>臀部拉伸 - 坐姿，一腿交叉于另一腿上，身体前倾，拉伸臀肌（20-30秒，2-3次）</li>
+        </ul>
+
+        <h4>手臂训练</h4>
+        <table>
+            <tr><th>动作</th><th>组数与次数</th><th>目标肌群</th></tr>
+            <tr><td data-details="哑铃锤式弯举：锤式握姿弯举，强化肱肌。" onclick="showDetail(this)">哑铃锤式弯举</td><td>4 组 × 10-12 次</td><td>肱肌和前臂</td></tr>
+            <tr><td data-details="史密斯机窄握推胸：窄握推举，针对肱三头肌。" onclick="showDetail(this)">史密斯机窄握推胸</td><td>4 组 × 8-12 次</td><td>肱三头肌</td></tr>
+            <tr><td data-details="龙门架绳索下压：绳索下压，强化肱三头肌。" onclick="showDetail(this)">龙门架绳索下压（最佳动作 - 肱三头肌）</td><td>4 组 × 12-15 次</td><td>肱三头肌</td></tr>
+            <tr><td data-details="杠铃弯举：弯举杠铃，强化肱二头肌。" onclick="showDetail(this)">杠铃弯举（最佳动作 - 肱二头肌）</td><td>4 组 × 8-12 次</td><td>肱二头肌</td></tr>
+        </table>
+        <h5>拉伸</h5>
+        <ul>
+            <li>肱二头肌拉伸 - 手臂伸直，手掌朝下靠墙，身体轻转，拉伸二头肌（20-30秒，2-3次）</li>
+            <li>肱三头肌拉伸 - 一手弯曲过头顶，另一手轻压肘部，拉伸三头肌（20-30秒，2-3次）</li>
+            <li>前臂拉伸 - 一手拉另一手手指向后，拉伸前臂肌群（20-30秒，2-3次）</li>
+        </ul>
+
+        <h4>休息日（周六）</h4>
+        <p>休息日，可进行轻度拉伸或散步，放松身体。</p>
+
+        <h4>放纵日（周日）</h4>
+        <p>休息日，享受放纵饮食，无需训练。</p>
+
+        <h4>训练与拉伸建议</h4>
+        <ul>
+            <li>训练：
+                <ul>
+                    <li>力量（8-12次）：休息90秒-2分钟。</li>
+                    <li>塑形（12-15次）：休息60-90秒。</li>
+                    <li>重量：70-85% 1RM，动作标准优先。</li>
+                    <li>热身：5-10分钟动态拉伸+轻重量。</li>
                 </ul>
-            </div>
-
-            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">背部训练</button>
-            <div class="content overflow-hidden max-h-0 transition-all duration-300 ease-out p-4">
-                 <table class="exercise-table w-full border-collapse my-4 rounded-lg overflow-hidden">
-                    <thead><tr class="bg-primary text-white"><th class="p-3 text-left border border-primary">动作</th><th class="p-3 text-left border border-primary">组数与次数</th><th class="p-3 text-left border border-primary">目标肌群</th></tr></thead>
-                    <tbody>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td>龙门架单臂绳索划船</td><td>每侧 4 组 × 10-12 次</td><td>背部细节</td></tr>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td>哑铃单臂划船</td><td>每侧 4 组 × 10-12 次</td><td>背阔肌和斜方肌</td></tr>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td>杠铃俯身划船</td><td>4 组 × 8-10 次</td><td>背部厚度</td></tr>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td><strong class="text-primary">高位下拉器宽握下拉（最佳动作）</strong></td><td>4 组 × 8-12 次</td><td>背阔肌宽度</td></tr>
-                    </tbody>
-                </table>
-                <h3 class="text-secondary text-xl font-semibold mt-6 mb-3">拉伸</h3>
-                <ul class="list-disc list-inside text-gray-700">
-                    <li>猫式拉伸 - 双手撑地，背部拱起，放松背阔肌（20-30秒，2-3次）</li>
-                    <li>侧身拉伸 - 站立，一手向上伸展并侧倾，拉伸背侧（20-30秒，2-3次）</li>
-                    <li>手臂交叉拉伸 - 双臂交叉于胸前，一手拉另一手臂，放松上背（20-30秒，2-3次）</li>
+            </li>
+            <li>拉伸：
+                <ul>
+                    <li>每动作保持20-30秒，重复2-3次。</li>
+                    <li>训练后进行，避免肌肉僵硬。</li>
+                    <li>深呼吸，缓慢放松，不要用力过猛。</li>
                 </ul>
-            </div>
-             <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">肩部训练</button>
-            <div class="content overflow-hidden max-h-0 transition-all duration-300 ease-out p-4">
-                <table class="exercise-table w-full border-collapse my-4 rounded-lg overflow-hidden">
-                    <thead><tr class="bg-primary text-white"><th class="p-3 text-left border border-primary">动作</th><th class="p-3 text-left border border-primary">组数与次数</th><th class="p-3 text-left border border-primary">目标肌群</th></tr></thead>
-                    <tbody>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td>哑铃侧平举</td><td>4 组 × 12-15 次</td><td>三角肌中束</td></tr>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td>龙门架绳索面拉</td><td>4 组 × 12-15 次</td><td>三角肌后束</td></tr>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td>杠铃前平举</td><td>4 组 × 10-12 次</td><td>三角肌前束</td></tr>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td><strong class="text-primary">史密斯机坐姿推举（最佳动作）</strong></td><td>4 组 × 8-12 次</td><td>三角肌整体</td></tr>
-                    </tbody>
-                </table>
-                <h3 class="text-secondary text-xl font-semibold mt-6 mb-3">拉伸</h3>
-                <ul class="list-disc list-inside text-gray-700">
-                    <li>手臂跨胸拉伸 - 一手臂横跨胸前，另一手轻压，拉伸三角肌后束（20-30秒，2-3次）</li>
-                    <li>肩部后拉 - 双手背后相握，向后拉，打开肩前（20-30秒，2-3次）</li>
-                    <li>颈部侧拉 - 一手拉头部向一侧，放松斜方肌和肩部（20-30秒，2-3次）</li>
-                </ul>
-            </div>
+            </li>
+        </ul>
+    </div>
 
-            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">腿部训练</button>
-            <div class="content overflow-hidden max-h-0 transition-all duration-300 ease-out p-4">
-                <table class="exercise-table w-full border-collapse my-4 rounded-lg overflow-hidden">
-                     <thead><tr class="bg-primary text-white"><th class="p-3 text-left border border-primary">动作</th><th class="p-3 text-left border border-primary">组数与次数</th><th class="p-3 text-left border border-primary">目标肌群</th></tr></thead>
-                    <tbody>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td>史密斯机弓步</td><td>每侧 4 组 × 10-12 次</td><td>单腿力量</td></tr>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td>腿伸展器</td><td>4 组 × 12-15 次</td><td>股四头肌</td></tr>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td>龙门架绳索臀推</td><td>4 组 × 12-15 次</td><td>臀大肌和腘绳肌</td></tr>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td><strong class="text-primary">杠铃深蹲（最佳动作）</strong></td><td>4 组 × 8-12 次</td><td>腿部整体</td></tr>
-                    </tbody>
-                </table>
-                <h3 class="text-secondary text-xl font-semibold mt-6 mb-3">拉伸</h3>
-                <ul class="list-disc list-inside text-gray-700">
-                    <li>股四头肌拉伸 - 站立，一手拉脚跟至臀部，拉伸大腿前侧（20-30秒，2-3次）</li>
-                    <li>腘绳肌拉伸 - 坐地，一腿伸直，身体前倾，拉伸腿后侧（20-30秒，2-3次）</li>
-                    <li>臀部拉伸 - 坐姿，一腿交叉于另一腿上，身体前倾，拉伸臀肌（20-30秒，2-3次）</li>
-                </ul>
-            </div>
-
-            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">手臂训练</button>
-            <div class="content overflow-hidden max-h-0 transition-all duration-300 ease-out p-4">
-                <table class="exercise-table w-full border-collapse my-4 rounded-lg overflow-hidden">
-                    <thead><tr class="bg-primary text-white"><th class="p-3 text-left border border-primary">动作</th><th class="p-3 text-left border border-primary">组数与次数</th><th class="p-3 text-left border border-primary">目标肌群</th></tr></thead>
-                    <tbody>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td>哑铃锤式弯举</td><td>4 组 × 10-12 次</td><td>肱肌和前臂</td></tr>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td>史密斯机窄握推胸</td><td>4 组 × 8-12 次</td><td>肱三头肌</td></tr>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td><strong class="text-primary">龙门架绳索下压（最佳动作 - 肱三头肌）</strong></td><td>4 组 × 12-15 次</td><td>肱三头肌</td></tr>
-                        <tr class="bg-gray-50 even:bg-gray-100"><td><strong class="text-primary">杠铃弯举（最佳动作 - 肱二头肌）</strong></td><td>4 组 × 8-12 次</td><td>肱二头肌</td></tr>
-                    </tbody>
-                </table>
-                <h3 class="text-secondary text-xl font-semibold mt-6 mb-3">拉伸</h3>
-                <ul class="list-disc list-inside text-gray-700">
-                    <li>肱二头肌拉伸 - 手臂伸直，手掌朝下靠墙，身体轻转，拉伸二头肌（20-30秒，2-3次）</li>
-                    <li>肱三头肌拉伸 - 一手弯曲过头顶，另一手轻压肘部，拉伸三头肌（20-30秒，2-3次）</li>
-                    <li>前臂拉伸 - 一手拉另一手手指向后，拉伸前臂肌群（20-30秒，2-3次）</li>
-                </ul>
-            </div>
-
-            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">休息日（周六）</button>
-            <div class="content overflow-hidden max-h-0 transition-all duration-300 ease-out p-4">
-                <p class="text-gray-700">休息日，可进行轻度拉伸或散步，放松身体。</p>
-            </div>
-
-            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">放纵日（周日）</button>
-            <div class="content overflow-hidden max-h-0 transition-all duration-300 ease-out p-4">
-                <p class="text-gray-700">休息日，享受放纵饮食，无需训练。</p>
-            </div>
-
-
-            <div class="training-notes bg-warning p-5 rounded-lg mt-8 text-gray-800">
-                <h3 class="text-secondary text-xl font-bold mb-3">训练与拉伸建议</h3>
-                <ul class="list-disc list-inside space-y-2">
-                    <li><strong class="text-secondary">训练：</strong>
-                        <ul class="list-circle list-inside ml-4 mt-1">
-                            <li>力量（8-12次）：休息90秒-2分钟。</li>
-                            <li>塑形（12-15次）：休息60-90秒。</li>
-                            <li>重量：70-85% 1RM，动作标准优先。</li>
-                            <li>热身：5-10分钟动态拉伸+轻重量。</li>
-                        </ul>
-                    </li>
-                    <li><strong class="text-secondary">拉伸：</strong>
-                        <ul class="list-circle list-inside ml-4 mt-1">
-                            <li>每动作保持20-30秒，重复2-3次。</li>
-                            <li>训练后进行，避免肌肉僵硬。</li>
-                            <li>深呼吸，缓慢放松，不要用力过猛。</li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
+    <div class="record-module">
+        <h3>训练记录模块</h3>
+        <div class="record-actions">
+            <button id="checkInBtn">打卡今日训练</button>
+            <button id="viewRecordsBtn">查看打卡记录</button>
+            <button id="exportRecordsBtn">导出当前运动数据</button>
+            <button id="clearRecordsBtn">清除当前运动数据</button>
         </div>
-
-        <div class="section mb-8">
-            <h2 class="text-secondary text-2xl font-bold border-b-2 border-primary pb-3 mb-4 text-center">训练记录模块</h2>
-            <button class="collapsible bg-accent text-secondary cursor-pointer p-4 rounded-md text-left text-lg font-semibold w-full mb-1 transition-all duration-300 ease-in-out hover:bg-gray-300 active:bg-gray-400 focus:outline-none">记录与查看训练数据</button>
-            <div class="content overflow-hidden max-h-0 transition-all duration-300 ease-out p-4">
-                <div class="exercise-log-input flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-3 my-4">
-                    <input type="date" id="trainingDateInput" class="p-3 border border-border rounded-lg w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-primary">
-                    <select id="exerciseSelect" onchange="onExerciseSelectChange()" class="p-3 border border-border rounded-lg w-full sm:w-auto flex-grow focus:outline-none focus:ring-2 focus:ring-primary">
-                        </select>
-                    <input type="number" id="weightInput" step="0.1" placeholder="重量 (kg)" class="p-3 border border-border rounded-lg w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-primary">
-                    <input type="number" id="setsInput" step="1" placeholder="组数" class="p-3 border border-border rounded-lg w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-primary">
-                    <input type="number" id="repsInput" step="1" placeholder="次数" class="p-3 border border-border rounded-lg w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-primary">
-                    <button onclick="addExerciseLog()" class="bg-primary hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-200 w-full sm:w-auto">记录训练</button>
-                </div>
-                <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-3 my-4">
-                    <input type="text" id="newExerciseInput" placeholder="添加新运动 (如：哑铃飞鸟)" class="p-3 border border-border rounded-lg w-full sm:w-auto flex-grow focus:outline-none focus:ring-2 focus:ring-primary">
-                    <button onclick="addCustomExercise()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-200 w-full sm:w-auto">添加运动</button>
-                </div>
-                <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-3 my-4">
-                    <button onclick="exportCurrentExerciseData()" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-200 w-full sm:w-auto">导出当前运动数据</button>
-                    <button onclick="clearCurrentExerciseData()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-200 w-full sm:w-auto">清除当前运动数据</button>
-                </div>
-                <div class="relative h-64 sm:h-80 md:h-96">
-                    <canvas id="exerciseChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="section mb-8">
-            <h2 class="text-secondary text-2xl font-bold border-b-2 border-primary pb-3 mb-4 text-center">注意事项</h2>
-            <div class="notes bg-warning p-5 rounded-lg text-gray-800">
-                <p class="mb-2"><strong class="text-secondary">饮水：</strong> 每日 2.5-3 升，训练后淡盐水或椰子水。</p>
-                <p class="mb-2"><strong class="text-secondary">监测：</strong> 定期评估训练效果和身体状况。</p>
-                <p class="mb-2"><strong class="text-secondary">调整：</strong> 若训练停滞，考虑调整训练量、强度或动作。</p>
-                <p><strong class="text-secondary">复查：</strong> 3 个月后测 BMI、尿酸、ALT、血压。</p>
-            </div>
+        <div id="recordDisplay">
+            <h4>今日打卡状态</h4>
+            <p id="checkInStatus">未打卡</p>
+            <h4>历史记录</h4>
+            <ul id="historyList"></ul>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <h3>注意事项</h3>
+    <ul>
+        <li>饮水： 每日 2.5-3 升，训练后淡盐水或椰子水。</li>
+        <li>监测： 定期评估训练效果和身体状况。</li>
+        <li>调整： 若训练停滞，考虑调整训练量、强度或动作。</li>
+        <li>复查： 3 个月后测 BMI、尿酸、ALT、血压。</li>
+    </ul>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 动态加载今日训练计划
+            const weeklyPlan = document.getElementById('weekly-plan');
+            const allPlans = document.getElementById('all-plans');
+            function loadTodayPlan() {
+                const day = new Date().getDay(); // 0-6, 0为星期日
+                const plans = {
+                    1: '胸部训练',
+                    2: '背部训练',
+                    3: '肩部训练',
+                    4: '腿部训练',
+                    5: '手臂训练'
+                };
+                const planName = plans[day] || (day === 6 ? '休息日（周六）' : '放纵日（周日）');
+                if (plans[day]) {
+                    weeklyPlan.innerHTML = allPlans.querySelector(`#${planName.toLowerCase().replace(' ', '-')}`).parentElement.innerHTML;
+                } else {
+                    weeklyPlan.innerHTML = `<p>${planName}</p>`;
+                }
+            }
+            loadTodayPlan();
+
+            // 动作介绍
+            function showDetail(element) {
+                alert(element.getAttribute('data-details') || '暂无详细说明，请联系管理员添加。');
+            }
+
+            // 打卡功能
+            const checkInBtn = document.getElementById('checkInBtn');
+            const viewRecordsBtn = document.getElementById('viewRecordsBtn');
+            const exportRecordsBtn = document.getElementById('exportRecordsBtn');
+            const clearRecordsBtn = document.getElementById('clearRecordsBtn');
+            const checkInStatus = document.getElementById('checkInStatus');
+            const historyList = document.getElementById('historyList');
+
+            function loadCheckInStatus() {
+                const today = new Date().toISOString().split('T')[0];
+                const records = JSON.parse(localStorage.getItem('trainingRecords') || '{}');
+                const currentPlan = getTodayPlan();
+                if (records[today]) {
+                    checkInStatus.textContent = `已打卡 - ${records[today]}`;
+                } else {
+                    checkInStatus.textContent = '未打卡';
+                }
+                loadHistory();
+            }
+
+            checkInBtn.addEventListener('click', () => {
+                const today = new Date().toISOString().split('T')[0];
+                const records = JSON.parse(localStorage.getItem('trainingRecords') || '{}');
+                const currentPlan = getTodayPlan();
+                records[today] = `完成: ${currentPlan}`;
+                localStorage.setItem('trainingRecords', JSON.stringify(records));
+                loadCheckInStatus();
+                alert('打卡成功！');
+            });
+
+            viewRecordsBtn.addEventListener('click', () => {
+                loadHistory();
+            });
+
+            function loadHistory() {
+                const records = JSON.parse(localStorage.getItem('trainingRecords') || '{}');
+                historyList.innerHTML = '';
+                for (let date in records) {
+                    const li = document.createElement('li');
+                    li.textContent = `${date}: ${records[date]}`;
+                    historyList.appendChild(li);
+                }
+            }
+
+            exportRecordsBtn.addEventListener('click', () => {
+                const records = localStorage.getItem('trainingRecords');
+                const blob = new Blob([records], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'training_records.json';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+
+            clearRecordsBtn.addEventListener('click', () => {
+                if (confirm('确定清除所有打卡记录？')) {
+                    localStorage.removeItem('trainingRecords');
+                    loadCheckInStatus();
+                }
+            });
+
+            function getTodayPlan() {
+                const day = new Date().getDay();
+                const plans = {
+                    1: '胸部训练',
+                    2: '背部训练',
+                    3: '肩部训练',
+                    4: '腿部训练',
+                    5: '手臂训练'
+                };
+                return plans[day] || '休息日';
+            }
+
+            loadCheckInStatus();
+        });
+    </script>
 </body>
 </html>
