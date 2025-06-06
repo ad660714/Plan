@@ -3,264 +3,484 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>训练与运动记录</title>
+    <title>您的身体重塑核心计划</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h3 { color: #333; }
-        table { border-collapse: collapse; margin: 10px 0; }
-        td, th { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        button { margin: 5px; padding: 5px 10px; }
-        #recordDisplay { margin-top: 10px; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3, h4 {
+            color: #2c3e50;
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+        }
+        h1 { font-size: 2.2em; }
+        h2 { font-size: 1.8em; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        h3 { font-size: 1.4em; }
+        h4 { font-size: 1.2em; }
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            margin-bottom: 1em;
+        }
+        ol {
+            list-style-type: decimal;
+            margin-left: 20px;
+            margin-bottom: 1em;
+        }
+        li {
+            margin-bottom: 0.5em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1em;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+      .citation {
+            font-size: 0.85em;
+            vertical-align: super;
+            color: #007bff;
+            cursor: pointer;
+        }
+      .detailed-theory-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px dashed #ccc;
+        }
+      .detailed-theory-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #e9f7ef;
+            border-left: 5px solid #28a745;
+            border-radius: 4px;
+        }
+      .detailed-theory-item h4 {
+            margin-top: 0;
+            color: #28a745;
+        }
     </style>
 </head>
 <body>
-    <h1>训练与运动记录</h1>
-    <p>正在加载用户ID...</p>
 
-    <h3>是否开始训练计划</h3>
-    <label><input type="radio" name="startPlan" value="yes"> 是</label>
-    <label><input type="radio" name="startPlan" value="no"> 否</label>
+    <h1>您的身体重塑核心计划</h1>
 
-    <h3>身体状况与参数</h3>
-    <p>当前体重： 91.4 kg | 目标体重： 69 kg | 减重目标： 22.4 kg</p>
-    <p>计划周期： 9-12 个月 | 每周减重目标： 0.5-1 kg</p>
-    <p>训练频率： 每周 5 天（周一至周五训练，周六非训练，周日放纵）</p>
+    <p>身体重塑旨在同时减少体脂并增加或维持肌肉量，对于您目前的情况（体重178斤/89公斤，身高175厘米，训练3个月）是完全可行的。关键在于精确的卡路里和宏量营养素摄入，以及优化的训练和恢复策略。</p>
 
-    <h3>每周训练计划</h3>
-    <div id="weekly-plan">
-        加载建议训练计划...
-    </div>
+    <h2>一、营养基础：为您的转变提供燃料</h2>
 
-    <div id="all-plans" style="display: none;">
-        <h4>胸部训练</h4>
-        <table>
-            <tr><th>动作</th><th>组数与次数</th><th>目标肌群</th></tr>
-            <tr><td data-details="哑铃上斜推：仰卧在倾斜凳上，双手持哑铃向上推举，注意控制动作幅度。" onclick="showDetail(this)">哑铃上斜推</td><td>4 组 × 10-12 次</td><td>胸部上缘</td></tr>
-            <tr><td data-details="史密斯机下斜推：使用史密斯机，下斜角度推举，注重胸下部发力。" onclick="showDetail(this)">史密斯机下斜推</td><td>4 组 × 8-12 次</td><td>胸部下缘</td></tr>
-            <tr><td data-details="蝴蝶机夹胸：坐在蝴蝶机上，双手向中间夹合，注重内侧胸肌。" onclick="showDetail(this)">蝴蝶机夹胸</td><td>4 组 × 12-15 次</td><td>胸大肌内侧</td></tr>
-            <tr><td data-details="杠铃卧推：平卧推举杠铃，全面刺激胸肌，注意安全。" onclick="showDetail(this)">杠铃卧推（最佳动作）</td><td>4 组 × 8-12 次</td><td>全面胸肌</td></tr>
-        </table>
-        <h5>拉伸</h5>
-        <ul>
-            <li>门框胸部拉伸 - 双臂撑门框，身体前倾，拉伸胸大肌（20-30秒，2-3次）</li>
-            <li>手臂后拉伸 - 一手抓住另一侧手臂，向后拉，放松胸部和肩前（20-30秒，2-3次）</li>
-            <li>跪姿胸椎伸展 - 跪地，双手前伸，胸部下沉，拉伸胸肌和背部（20-30秒，2-3次）</li>
-        </ul>
-
-        <h4>背部训练</h4>
-        <table>
-            <tr><th>动作</th><th>组数与次数</th><th>目标肌群</th></tr>
-            <tr><td data-details="龙门架单臂绳索划船：单臂拉绳索，注重背部细节。" onclick="showDetail(this)">龙门架单臂绳索划船</td><td>每侧 4 组 × 10-12 次</td><td>背部细节</td></tr>
-            <tr><td data-details="哑铃单臂划船：单手撑地，另一手划船，强化背阔肌。" onclick="showDetail(this)">哑铃单臂划船</td><td>每侧 4 组 × 10-12 次</td><td>背阔肌和斜方肌</td></tr>
-            <tr><td data-details="杠铃俯身划船：俯身拉杠铃，增加背部厚度。" onclick="showDetail(this)">杠铃俯身划船</td><td>4 组 × 8-10 次</td><td>背部厚度</td></tr>
-            <tr><td data-details="高位下拉器宽握下拉：宽握下拉，扩展背阔肌。" onclick="showDetail(this)">高位下拉器宽握下拉（最佳动作）</td><td>4 组 × 8-12 次</td><td>背阔肌宽度</td></tr>
-        </table>
-        <h5>拉伸</h5>
-        <ul>
-            <li>猫式拉伸 - 双手撑地，背部拱起，放松背阔肌（20-30秒，2-3次）</li>
-            <li>侧身拉伸 - 站立，一手向上伸展并侧倾，拉伸背侧（20-30秒，2-3次）</li>
-            <li>手臂交叉拉伸 - 双臂交叉于胸前，一手拉另一手臂，放松上背（20-30秒，2-3次）</li>
-        </ul>
-
-        <h4>肩部训练</h4>
-        <table>
-            <tr><th>动作</th><th>组数与次数</th><th>目标肌群</th></tr>
-            <tr><td data-details="哑铃侧平举：双手持哑铃侧举，强化三角肌中束。" onclick="showDetail(this)">哑铃侧平举</td><td>4 组 × 12-15 次</td><td>三角肌中束</td></tr>
-            <tr><td data-details="龙门架绳索面拉：拉绳索至脸部，针对后束。" onclick="showDetail(this)">龙门架绳索面拉</td><td>4 组 × 12-15 次</td><td>三角肌后束</td></tr>
-            <tr><td data-details="杠铃前平举：前举杠铃，锻炼前束。" onclick="showDetail(this)">杠铃前平举</td><td>4 组 × 10-12 次</td><td>三角肌前束</td></tr>
-            <tr><td data-details="史密斯机坐姿推举：坐姿推举，全面刺激三角肌。" onclick="showDetail(this)">史密斯机坐姿推举（最佳动作）</td><td>4 组 × 8-12 次</td><td>三角肌整体</td></tr>
-        </table>
-        <h5>拉伸</h5>
-        <ul>
-            <li>手臂跨胸拉伸 - 一手臂横跨胸前，另一手轻压，拉伸三角肌后束（20-30秒，2-3次）</li>
-            <li>肩部后拉 - 双手背后相握，向后拉，打开肩前（20-30秒，2-3次）</li>
-            <li>颈部侧拉 - 一手拉头部向一侧，放松斜方肌和肩部（20-30秒，2-3次）</li>
-        </ul>
-
-        <h4>腿部训练</h4>
-        <table>
-            <tr><th>动作</th><th>组数与次数</th><th>目标肌群</th></tr>
-            <tr><td data-details="史密斯机弓步：单腿弓步，增强力量。" onclick="showDetail(this)">史密斯机弓步</td><td>每侧 4 组 × 10-12 次</td><td>单腿力量</td></tr>
-            <tr><td data-details="腿伸展器：坐姿伸腿，强化股四头肌。" onclick="showDetail(this)">腿伸展器</td><td>4 组 × 12-15 次</td><td>股四头肌</td></tr>
-            <tr><td data-details="龙门架绳索臀推：推绳索，锻炼臀部和腘绳肌。" onclick="showDetail(this)">龙门架绳索臀推</td><td>4 组 × 12-15 次</td><td>臀大肌和腘绳肌</td></tr>
-            <tr><td data-details="杠铃深蹲：深蹲杠铃，全面训练腿部。" onclick="showDetail(this)">杠铃深蹲（最佳动作）</td><td>4 组 × 8-12 次</td><td>腿部整体</td></tr>
-        </table>
-        <h5>拉伸</h5>
-        <ul>
-            <li>股四头肌拉伸 - 站立，一手拉脚跟至臀部，拉伸大腿前侧（20-30秒，2-3次）</li>
-            <li>腘绳肌拉伸 - 坐地，一腿伸直，身体前倾，拉伸腿后侧（20-30秒，2-3次）</li>
-            <li>臀部拉伸 - 坐姿，一腿交叉于另一腿上，身体前倾，拉伸臀肌（20-30秒，2-3次）</li>
-        </ul>
-
-        <h4>手臂训练</h4>
-        <table>
-            <tr><th>动作</th><th>组数与次数</th><th>目标肌群</th></tr>
-            <tr><td data-details="哑铃锤式弯举：锤式握姿弯举，强化肱肌。" onclick="showDetail(this)">哑铃锤式弯举</td><td>4 组 × 10-12 次</td><td>肱肌和前臂</td></tr>
-            <tr><td data-details="史密斯机窄握推胸：窄握推举，针对肱三头肌。" onclick="showDetail(this)">史密斯机窄握推胸</td><td>4 组 × 8-12 次</td><td>肱三头肌</td></tr>
-            <tr><td data-details="龙门架绳索下压：绳索下压，强化肱三头肌。" onclick="showDetail(this)">龙门架绳索下压（最佳动作 - 肱三头肌）</td><td>4 组 × 12-15 次</td><td>肱三头肌</td></tr>
-            <tr><td data-details="杠铃弯举：弯举杠铃，强化肱二头肌。" onclick="showDetail(this)">杠铃弯举（最佳动作 - 肱二头肌）</td><td>4 组 × 8-12 次</td><td>肱二头肌</td></tr>
-        </table>
-        <h5>拉伸</h5>
-        <ul>
-            <li>肱二头肌拉伸 - 手臂伸直，手掌朝下靠墙，身体轻转，拉伸二头肌（20-30秒，2-3次）</li>
-            <li>肱三头肌拉伸 - 一手弯曲过头顶，另一手轻压肘部，拉伸三头肌（20-30秒，2-3次）</li>
-            <li>前臂拉伸 - 一手拉另一手手指向后，拉伸前臂肌群（20-30秒，2-3次）</li>
-        </ul>
-
-        <h4>休息日（周六）</h4>
-        <p>休息日，可进行轻度拉伸或散步，放松身体。</p>
-
-        <h4>放纵日（周日）</h4>
-        <p>休息日，享受放纵饮食，无需训练。</p>
-
-        <h4>训练与拉伸建议</h4>
-        <ul>
-            <li>训练：
-                <ul>
-                    <li>力量（8-12次）：休息90秒-2分钟。</li>
-                    <li>塑形（12-15次）：休息60-90秒。</li>
-                    <li>重量：70-85% 1RM，动作标准优先。</li>
-                    <li>热身：5-10分钟动态拉伸+轻重量。</li>
-                </ul>
-            </li>
-            <li>拉伸：
-                <ul>
-                    <li>每动作保持20-30秒，重复2-3次。</li>
-                    <li>训练后进行，避免肌肉僵硬。</li>
-                    <li>深呼吸，缓慢放松，不要用力过猛。</li>
-                </ul>
-            </li>
-        </ul>
-    </div>
-
-    <div class="record-module">
-        <h3>训练记录模块</h3>
-        <div class="record-actions">
-            <button id="checkInBtn">打卡今日训练</button>
-            <button id="viewRecordsBtn">查看打卡记录</button>
-            <button id="exportRecordsBtn">导出当前运动数据</button>
-            <button id="clearRecordsBtn">清除当前运动数据</button>
-        </div>
-        <div id="recordDisplay">
-            <h4>今日打卡状态</h4>
-            <p id="checkInStatus">未打卡</p>
-            <h4>历史记录</h4>
-            <ul id="historyList"></ul>
-        </div>
-    </div>
-
-    <h3>注意事项</h3>
+    <h3>1. 每日卡路里目标：</h3>
     <ul>
-        <li>饮水： 每日 2.5-3 升，训练后淡盐水或椰子水。</li>
-        <li>监测： 定期评估训练效果和身体状况。</li>
-        <li>调整： 若训练停滞，考虑调整训练量、强度或动作。</li>
-        <li>复查： 3 个月后测 BMI、尿酸、ALT、血压。</li>
+        <li>您的基础代谢率（BMR）约为 <strong>1864 大卡</strong><sup class="citation"><a href="#snippet-[span_0](start_span)[span_0](end_span)">[span_6](start_span)[span_6](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_7](start_span)[span_7](end_span)">[span_11](start_span)[span_11](end_span)</a></sup>。</li>
+        <li>考虑到您每周5练，您的每日总能量消耗（TDEE）约为 <strong>2889 大卡</strong><sup class="citation"><a href="#snippet-[span_19](start_span)[span_19](end_span)">[span_20](start_span)[span_20](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_1](start_span)[span_1](end_span)">[span_2](start_span)[span_2](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_24](start_span)[span_24](end_span)">[span_34](start_span)[span_34](end_span)</a></sup>。</li>
+        <li>为了增肌减脂，建议您每日摄入比TDEE低 <strong>200-400 大卡</strong> 的热量<sup class="citation"><a href="#snippet-[span_35](start_span)[span_35](end_span)">[span_36](start_span)[span_36](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_37](start_span)[span_37](end_span)">[span_41](start_span)[span_41](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_46](start_span)[span_46](end_span)">[span_47](start_span)[span_47](end_span)</a></sup>。</li>
+        <li>因此，您的目标每日卡路里摄入量应在 <strong>2489-2689 大卡</strong> 之间。</li>
     </ul>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // 动态加载今日训练计划
-            const weeklyPlan = document.getElementById('weekly-plan');
-            const allPlans = document.getElementById('all-plans');
-            function loadTodayPlan() {
-                const day = new Date().getDay(); // 0-6, 0为星期日
-                const plans = {
-                    1: '胸部训练',
-                    2: '背部训练',
-                    3: '肩部训练',
-                    4: '腿部训练',
-                    5: '手臂训练'
-                };
-                const planName = plans[day] || (day === 6 ? '休息日（周六）' : '放纵日（周日）');
-                if (plans[day]) {
-                    weeklyPlan.innerHTML = allPlans.querySelector(`#${planName.toLowerCase().replace(' ', '-')}`).parentElement.innerHTML;
-                } else {
-                    weeklyPlan.innerHTML = `<p>${planName}</p>`;
-                }
-            }
-            loadTodayPlan();
+    <h3>2. 宏量营养素分配：</h3>
+    <ul>
+        <li><strong>蛋白质：</strong> 每日每公斤体重摄入 <strong>1.6至2.2克</strong> 蛋白质，即约 <strong>160-200克</strong><sup class="citation"><a href="#snippet-[span_48](start_span)[span_48](end_span)">[span_49](start_span)[span_49](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_60](start_span)[span_60](end_span)">[span_61](start_span)[span_61](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_12](start_span)[span_12](end_span)">[span_91](start_span)[span_91](end_span)</a></sup>。蛋白质是肌肉修复和生长的基础，并能增加饱腹感<sup class="citation"><a href="#snippet-[span_92](start_span)[span_92](end_span)">[span_93](start_span)[span_93](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_94](start_span)[span_94](end_span)">[span_110](start_span)[span_110](end_span)</a></sup>。将蛋白质均匀分配到每日4-5餐中<sup class="citation"><a href="#snippet-[span_62](start_span)[span_62](end_span)">[span_63](start_span)[span_63](end_span)</a></sup>。</li>
+        <li><strong>碳水化合物：</strong> 约占每日总卡路里的 <strong>40%</strong>，即约 <strong>250-270克</strong><sup class="citation"><a href="#snippet-[span_95](start_span)[span_95](end_span)">[span_96](start_span)[span_96](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_97](start_span)[span_97](end_span)">[span_111](start_span)[span_111](end_span)</a></sup>。碳水化合物是高强度训练的主要燃料。
+            <ul>
+                <li><strong>碳水化合物循环：</strong> 在训练日可略微提高碳水化合物摄入量（每公斤体重约3.3-5.5克），在休息日则适当减少（每公斤体重约1.1-2.2克），以优化训练表现和脂肪燃烧<sup class="citation"><a href="#snippet-[span_64](start_span)[span_64](end_span)">[span_65](start_span)[span_65](end_span)</a></sup>。</li>
+            </ul>
+        </li>
+        <li><strong>脂肪：</strong> 约占每日总卡路里的 <strong>30-35%</strong>，即约 <strong>83-90克</strong><sup class="citation"><a href="#snippet-[span_98](start_span)[span_98](end_span)">[span_112](start_span)[span_112](end_span)</a></sup>。健康脂肪对荷尔蒙健康和饱腹感至关重要<sup class="citation"><a href="#snippet-[span_99](start_span)[span_99](end_span)">[span_100](start_span)[span_100](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_101](start_span)[span_101](end_span)">[span_113](start_span)[span_113](end_span)</a></sup>。</li>
+        <li><strong>优先选择：</strong> 瘦肉蛋白（鸡胸肉、鱼、蛋）、复合碳水化合物（糙米、燕麦、红薯）和健康脂肪（坚果、牛油果、橄榄油）<sup class="citation"><a href="#snippet-[span_66](start_span)[span_66](end_span)">[span_67](start_span)[span_67](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_115](start_span)[span_115](end_span)">[span_121](start_span)[span_121](end_span)</a></sup>。</li>
+    </ul>
 
-            // 动作介绍
-            function showDetail(element) {
-                alert(element.getAttribute('data-details') || '暂无详细说明，请联系管理员添加。');
-            }
+    <h3>3. 训练前后的营养：</h3>
+    <ul>
+        <li><strong>训练前（下午5点训练）：</strong> 训练前1-4小时摄入复合碳水化合物和适量瘦肉蛋白，例如午餐可以作为主要的训练前餐<sup class="citation"><a href="#snippet-[span_129](start_span)[span_129](end_span)">[span_130](start_span)[span_130](end_span)</a></sup>。</li>
+        <li><strong>训练后：</strong> 训练结束后60分钟内，摄入碳水化合物和蛋白质的组合，以快速补充糖原并启动肌肉修复<sup class="citation"><a href="#snippet-[span_131](start_span)[span_131](end_span)">[span_132](start_span)[span_132](end_span)</a></sup>。</li>
+        <li><strong>补水：</strong> 全天保持充足水分，训练期间和训练后补充水分和电解质，以维持运动表现和身体功能<sup class="citation"><a href="#snippet-[span_144](start_span)[span_144](end_span)">[span_153](start_span)[span_153](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_154](start_span)[span_154](end_span)">[span_145](start_span)[span_145](end_span)</a></sup>。</li>
+    </ul>
 
-            // 打卡功能
-            const checkInBtn = document.getElementById('checkInBtn');
-            const viewRecordsBtn = document.getElementById('viewRecordsBtn');
-            const exportRecordsBtn = document.getElementById('exportRecordsBtn');
-            const clearRecordsBtn = document.getElementById('clearRecordsBtn');
-            const checkInStatus = document.getElementById('checkInStatus');
-            const historyList = document.getElementById('historyList');
+    <h2>二、优化您的训练：更高效地刺激肌肉</h2>
 
-            function loadCheckInStatus() {
-                const today = new Date().toISOString().split('T')[0];
-                const records = JSON.parse(localStorage.getItem('trainingRecords') || '{}');
-                const currentPlan = getTodayPlan();
-                if (records[today]) {
-                    checkInStatus.textContent = `已打卡 - ${records[today]}`;
-                } else {
-                    checkInStatus.textContent = '未打卡';
-                }
-                loadHistory();
-            }
+    <h3>1. 渐进超负荷：</h3>
+    <p>这是持续进步的核心。通过系统性地增加训练压力，例如增加重量、重复次数、组数，或缩短组间休息时间，来不断挑战肌肉<sup class="citation"><a href="#snippet-[span_160](start_span)[span_160](end_span)">[span_161](start_span)[span_161](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_169](start_span)[span_169](end_span)">[span_170](start_span)[span_170](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_182](start_span)[span_182](end_span)">[span_183](start_span)[span_183](end_span)</a></sup>。</p>
 
-            checkInBtn.addEventListener('click', () => {
-                const today = new Date().toISOString().split('T')[0];
-                const records = JSON.parse(localStorage.getItem('trainingRecords') || '{}');
-                const currentPlan = getTodayPlan();
-                records[today] = `完成: ${currentPlan}`;
-                localStorage.setItem('trainingRecords', JSON.stringify(records));
-                loadCheckInStatus();
-                alert('打卡成功！');
-            });
+    <h3>2. 训练分化调整：</h3>
+    <p>您目前的五分化训练可能导致每个肌肉群每周只训练一次，这对于增肌效率不高<sup class="citation"><a href="#snippet-[span_196](start_span)[span_196](end_span)">[span_197](start_span)[span_197](end_span)</a></sup>。</p>
+    <ul>
+        <li><strong>建议：</strong> 调整为 <strong>上/下肢分化</strong> 或 <strong>推/拉/腿分化（PPL循环模式）</strong>。这能确保每个主要肌肉群每周至少被训练两次，这对于肌肉生长至关重要<sup class="citation"><a href="#snippet-[span_25](start_span)[span_25](end_span)">[span_209](start_span)[span_209](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_198](start_span)[span_198](end_span)">[span_199](start_span)[span_199](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_26](start_span)[span_26](end_span)">[span_27](start_span)[span_27](end_span)</a></sup>。</li>
+    </ul>
 
-            viewRecordsBtn.addEventListener('click', () => {
-                loadHistory();
-            });
+    <h3>3. 训练量和强度：</h3>
+    <ul>
+        <li>每周每个肌肉群进行 <strong>10-20组</strong> 训练，对于中级训练者，<strong>12-16组</strong> 是一个合适的范围<sup class="citation"><a href="#snippet-[span_68](start_span)[span_68](end_span)">[span_69](start_span)[span_69](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_28](start_span)[span_28](end_span)">[span_210](start_span)[span_210](end_span)</a></sup>。</li>
+        <li>大多数组应训练到接近力竭，即在力竭前留下2-3次重复（RIR）<sup class="citation"><a href="#snippet-[span_211](start_span)[span_211](end_span)">[span_212](start_span)[span_212](end_span)</a></sup>。重复次数可在6-12次，甚至扩展到15次<sup class="citation"><a href="#snippet-[span_213](start_span)[span_213](end_span)">[span_214](start_span)[span_214](end_span)</a></sup>。</li>
+    </ul>
 
-            function loadHistory() {
-                const records = JSON.parse(localStorage.getItem('trainingRecords') || '{}');
-                historyList.innerHTML = '';
-                for (let date in records) {
-                    const li = document.createElement('li');
-                    li.textContent = `${date}: ${records[date]}`;
-                    historyList.appendChild(li);
-                }
-            }
+    <h3>4. 整合有氧运动：</h3>
+    <ul>
+        <li><strong>频率：</strong> 每周进行 <strong>2-3天</strong> 有氧运动<sup class="citation"><a href="#snippet-[span_50](start_span)[span_50](end_span)">[span_51](start_span)[span_51](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_224](start_span)[span_224](end_span)">[span_225](start_span)[span_225](end_span)</a></sup>。</li>
+        <li><strong>类型：</strong> 结合高强度间歇训练（HIIT）和低强度稳态有氧（LISS）<sup class="citation"><a href="#snippet-[span_233](start_span)[span_233](end_span)">[span_234](start_span)[span_234](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_243](start_span)[span_243](end_span)">[span_244](start_span)[span_244](end_span)</a></sup>。
+            <ul>
+                <li>HIIT：每周1-2次，每次15-30分钟，高效燃脂并有“后燃效应”<sup class="citation"><a href="#snippet-[span_256](start_span)[span_256](end_span)">[span_235](start_span)[span_235](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_171](start_span)[span_171](end_span)">[span_172](start_span)[span_172](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_245](start_span)[span_245](end_span)">[span_246](start_span)[span_246](end_span)</a></sup>。</li>
+                <li>LISS：每周至少120分钟，每次30-45分钟，心率保持在最大心率的60-70%，主要以脂肪为燃料<sup class="citation"><a href="#snippet-[span_226](start_span)[span_226](end_span)">[span_227](start_span)[span_227](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_173](start_span)[span_173](end_span)">[span_174](start_span)[span_174](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_247](start_span)[span_247](end_span)">[span_248](start_span)[span_248](end_span)</a></sup>。</li>
+            </ul>
+        </li>
+        <li><strong>时机：</strong> 建议在力量训练之后进行有氧运动，或将两者安排在不同的训练日（间隔4-6小时）<sup class="citation"><a href="#snippet-[span_277](start_span)[span_277](end_span)">[span_301](start_span)[span_301](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_278](start_span)[span_278](end_span)">[span_279](start_span)[span_279](end_span)</a></sup>。力量训练需要更多能量，先进行力量训练能确保最佳表现<sup class="citation"><a href="#snippet-[span_280](start_span)[span_280](end_span)">[span_302](start_span)[span_302](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_281](start_span)[span_281](end_span)">[span_282](start_span)[span_282](end_span)</a></sup>。</li>
+    </ul>
 
-            exportRecordsBtn.addEventListener('click', () => {
-                const records = localStorage.getItem('trainingRecords');
-                const blob = new Blob([records], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'training_records.json';
-                a.click();
-                URL.revokeObjectURL(url);
-            });
+    <h2>三、皮质醇管理与恢复：优化身体内部环境</h2>
 
-            clearRecordsBtn.addEventListener('click', () => {
-                if (confirm('确定清除所有打卡记录？')) {
-                    localStorage.removeItem('trainingRecords');
-                    loadCheckInStatus();
-                }
-            });
+    <h3>1. 优先保证高质量睡眠：</h3>
+    <p>目标是每晚至少 <strong>7-8小时</strong> 的优质睡眠<sup class="citation"><a href="#snippet-[span_303](start_span)[span_303](end_span)">[span_304](start_span)[span_304](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_333](start_span)[span_333](end_span)">[span_334](start_span)[span_334](end_span)</a></sup>。充足的睡眠对肌肉恢复、荷尔蒙平衡（包括生长激素和皮质醇）和脂肪代谢至关重要<sup class="citation"><a href="#snippet-[span_360](start_span)[span_360](end_span)">[span_361](start_span)[span_361](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_305](start_span)[span_305](end_span)">[span_375](start_span)[span_375](end_span)</a></sup>。</p>
 
-            function getTodayPlan() {
-                const day = new Date().getDay();
-                const plans = {
-                    1: '胸部训练',
-                    2: '背部训练',
-                    3: '肩部训练',
-                    4: '腿部训练',
-                    5: '手臂训练'
-                };
-                return plans[day] || '休息日';
-            }
+    <h3>2. 有效减压技巧：</h3>
+    <p>学习管理日常压力至关重要，因为长期高皮质醇水平会阻碍肌肉生长、增加脂肪储存（尤其是腹部）并影响恢复<sup class="citation"><a href="#snippet-[span_379](start_span)[span_379](end_span)">[span_380](start_span)[span_380](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_396](start_span)[span_396](end_span)">[span_397](start_span)[span_397](end_span)</a></sup>。</p>
+    <ul>
+        <li>尝试深呼吸练习、培养爱好、写日记或亲近自然<sup class="citation"><a href="#snippet-[span_335](start_span)[span_335](end_span)">[span_336](start_span)[span_336](end_span)</a></sup>。</li>
+    </ul>
 
-            loadCheckInStatus();
-        });
-    </script>
+    <h3>3. 避免过度训练：</h3>
+    <p>确保您的训练计划包含高强度和低强度日，并留出充足的恢复时间（相似训练之间间隔24-48小时）<sup class="citation"><a href="#snippet-[span_306](start_span)[span_306](end_span)">[span_307](start_span)[span_307](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_283](start_span)[span_283](end_span)">[span_284](start_span)[span_284](end_span)</a></sup>。定期（例如每6-8周）安排一个减载周，降低训练强度和量，让身体充分恢复<sup class="citation"><a href="#snippet-[span_308](start_span)[span_308](end_span)">[span_309](start_span)[span_309](end_span)</a></sup>。</p>
+
+    <h3>4. 营养支持：</h3>
+    <p>坚持全食物、富含纤维的饮食，限制加工食品、高糖饮料和过量咖啡因的摄入，这有助于调节皮质醇水平<sup class="citation"><a href="#snippet-[span_337](start_span)[span_337](end_span)">[span_338](start_span)[span_338](end_span)</a></sup>。</p>
+
+    <h2>四、追踪您的成功：超越体重秤</h2>
+
+    <p>不要仅仅依赖体重秤上的数字来衡量进步，因为它无法区分肌肉和脂肪的变化<sup class="citation"><a href="#snippet-[span_257](start_span)[span_257](end_span)">[span_258](start_span)[span_258](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_403](start_span)[span_403](end_span)">[span_404](start_span)[span_404](end_span)</a></sup>。</p>
+    <ul>
+        <li><strong>身体测量：</strong> 定期测量腰围、臀围、胸围、大腿围和手臂围，记录变化<sup class="citation"><a href="#snippet-[span_405](start_span)[span_405](end_span)">[span_406](start_span)[span_406](end_span)</a></sup>。</li>
+        <li><strong>体脂率：</strong> 如果条件允许，定期进行体脂率测试（如生物电阻抗分析BIA或DEXA扫描）<sup class="citation"><a href="#snippet-[span_259](start_span)[span_259](end_span)">[span_13](start_span)[span_13](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_260](start_span)[span_260](end_span)">[span_261](start_span)[span_261](end_span)</a></sup>。</li>
+        <li><strong>力量表现：</strong> 记录您在健身房举起的重量、完成的重复次数或训练时间，这是衡量进步的绝佳方式<sup class="citation"><a href="#snippet-[span_407](start_span)[span_407](end_span)">[span_408](start_span)[span_408](end_span)</a></sup>。</li>
+        <li><strong>其他指标：</strong> 关注能量水平、衣服合身度、静息心率、柔韧性和整体幸福感的改善<sup class="citation"><a href="#snippet-[span_409](start_span)[span_409](end_span)">[span_410](start_span)[span_410](end_span)</a></sup>。</li>
+        <li><strong>设定SMART目标：</strong> 设定具体、可衡量、可实现、相关且有时间限制的目标，以保持专注和动力<sup class="citation"><a href="#snippet-[span_184](start_span)[span_184](end_span)">[span_185](start_span)[span_185](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_411](start_span)[span_411](end_span)">[span_412](start_span)[span_412](end_span)</a></sup>。</li>
+    </ul>
+
+    <h2>五、您的具体行动计划：每日安排与核心动作</h2>
+
+    <p>这份计划旨在将科学原则转化为您日常可执行的步骤，帮助您高效增肌减脂。</p>
+
+    <h3>1. 每日时间安排概览</h3>
+    <p>考虑到您通常在下午5点训练，以下是一个推荐的每日时间安排，您可以根据自己的作息进行微调：</p>
+    <ul>
+        <li><strong>早上（起床后）：</strong>
+            <ul>
+                <li><strong>补水：</strong> 立即饮用一大杯水（约300-500毫升），开始一天的补水<sup class="citation"><a href="#snippet-[span_155](start_span)[span_155](end_span)">[span_156](start_span)[span_156](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_146](start_span)[span_146](end_span)">[span_147](start_span)[span_147](end_span)</a></sup>。</li>
+                <li><strong>早餐：</strong> 摄入高蛋白、复合碳水化合物的早餐，例如：燕麦片加乳清蛋白粉、鸡蛋、全麦面包和水果<sup class="citation"><a href="#snippet-[span_70](start_span)[span_70](end_span)">[span_71](start_span)[span_71](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_426](start_span)[span_426](end_span)">[span_427](start_span)[span_427](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_122](start_span)[span_122](end_span)">[span_123](start_span)[span_123](end_span)</a></sup>。</li>
+            </ul>
+        </li>
+        <li><strong>上午/中午：</strong>
+            <ul>
+                <li><strong>加餐（如果需要）：</strong> 如果距离午餐时间较长，可以加餐一份富含蛋白质和少量碳水化合物的零食，如希腊酸奶或坚果<sup class="citation"><a href="#snippet-[span_72](start_span)[span_72](end_span)">[span_73](start_span)[span_73](end_span)</a></sup>。</li>
+                <li><strong>午餐（训练前餐）：</strong> 在您下午5点训练前约1-4小时（即下午1点至4点之间）完成午餐<sup class="citation"><a href="#snippet-[span_133](start_span)[span_133](end_span)">[span_134](start_span)[span_134](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_362](start_span)[span_362](end_span)">[span_363](start_span)[span_363](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_339](start_span)[span_339](end_span)">[span_340](start_span)[span_340](end_span)</a></sup>。这顿餐应包含充足的复合碳水化合物（提供训练能量）和瘦肉蛋白（为肌肉提供氨基酸）<sup class="citation"><a href="#snippet-[span_135](start_span)[span_135](end_span)">[span_136](start_span)[span_136](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_364](start_span)[span_364](end_span)">[span_365](start_span)[span_365](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_341](start_span)[span_341](end_span)">[span_342](start_span)[span_342](end_span)</a></sup>。
+                    <ul>
+                        <li><strong>示例：</strong> 糙米/红薯/全麦面包 + 鸡胸肉/鱼肉 + 蔬菜<sup class="citation"><a href="#snippet-[span_74](start_span)[span_74](end_span)">[span_75](start_span)[span_75](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_428](start_span)[span_428](end_span)">[span_429](start_span)[span_429](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_124](start_span)[span_124](end_span)">[span_125](start_span)[span_125](end_span)</a></sup>。</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li><strong>下午（训练时间）：</strong>
+            <ul>
+                <li><strong>下午5点：力量训练</strong><sup class="citation"><a href="#snippet-[span_42](start_span)[span_42](end_span)">[span_43](start_span)[span_43](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_102](start_span)[span_102](end_span)">[span_103](start_span)[span_103](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_433](start_span)[span_433](end_span)">[span_434](start_span)[span_434](end_span)</a></sup>。
+                    <ul>
+                        <li><strong>热身（5-10分钟）：</strong> 进行轻度有氧（如快走、慢跑）和动态拉伸，为即将到来的训练做好准备<sup class="citation"><a href="#snippet-[span_44](start_span)[span_44](end_span)">[span_45](start_span)[span_45](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_148](start_span)[span_148](end_span)">[span_149](start_span)[span_149](end_span)</a></sup>。</li>
+                        <li><strong>力量训练：</strong> 按照下方具体的训练计划进行。</li>
+                        <li><strong>拉伸放松（5-10分钟）：</strong> 训练结束后进行静态拉伸，有助于缓解肌肉紧张和促进恢复<sup class="citation"><a href="#snippet-[span_285](start_span)[span_285](end_span)">[span_286](start_span)[span_286](end_span)</a></sup>。</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li><strong>训练后（60分钟内）：</strong>
+            <ul>
+                <li><strong>恢复餐/饮：</strong> 立即摄入碳水化合物和蛋白质的组合，以快速补充肌肉糖原并启动肌肉修复和生长<sup class="citation"><a href="#snippet-[span_137](start_span)[span_137](end_span)">[span_138](start_span)[span_138](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_366](start_span)[span_366](end_span)">[span_367](start_span)[span_367](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_343](start_span)[span_343](end_span)">[span_344](start_span)[span_344](end_span)</a></sup>。
+                    <ul>
+                        <li><strong>示例：</strong> 乳清蛋白饮品加香蕉，或低脂巧克力牛奶<sup class="citation"><a href="#snippet-[span_139](start_span)[span_139](end_span)">[span_140](start_span)[span_140](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_368](start_span)[span_368](end_span)">[span_369](start_span)[span_369](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_345](start_span)[span_345](end_span)">[span_346](start_span)[span_346](end_span)</a></sup>。</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li><strong>晚上：</strong>
+            <ul>
+                <li><strong>晚餐：</strong> 均衡的晚餐，继续保持高蛋白、适量碳水化合物和健康脂肪的摄入<sup class="citation"><a href="#snippet-[span_104](start_span)[span_104](end_span)">[span_105](start_span)[span_105](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_106](start_span)[span_106](end_span)">[span_114](start_span)[span_114](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_76](start_span)[span_76](end_span)">[span_77](start_span)[span_77](end_span)</a></sup>。</li>
+                <li><strong>睡前：</strong> 避免屏幕时间（睡前至少1小时），创造凉爽、黑暗、安静的睡眠环境<sup class="citation"><a href="#snippet-[span_310](start_span)[span_310](end_span)">[span_311](start_span)[span_311](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_262](start_span)[span_262](end_span)">[span_263](start_span)[span_263](end_span)</a></sup>。</li>
+            </ul>
+        </li>
+        <li><strong>睡眠：</strong>
+            <ul>
+                <li><strong>目标：</strong> 每晚保证 <strong>7-8小时</strong> 的优质睡眠<sup class="citation"><a href="#snippet-[span_312](start_span)[span_312](end_span)">[span_313](start_span)[span_313](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_347](start_span)[span_347](end_span)">[span_348](start_span)[span_348](end_span)</a></sup>。充足的睡眠对肌肉恢复、荷尔蒙平衡（包括皮质醇管理）和脂肪代谢至关重要<sup class="citation"><a href="#snippet-[span_314](start_span)[span_314](end_span)">[span_315](start_span)[span_315](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_398](start_span)[span_398](end_span)">[span_399](start_span)[span_399](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_370](start_span)[span_370](end_span)">[span_371](start_span)[span_371](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_438](start_span)[span_438](end_span)">[span_439](start_span)[span_439](end_span)</a></sup>。</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>2. 具体训练计划：上/下肢分化（每周5练示例）</h3>
+    <p>鉴于您每周5练，并为了确保每个主要肌肉群每周至少训练两次以最大化增肌效果<sup class="citation"><a href="#snippet-[span_200](start_span)[span_200](end_span)">[span_201](start_span)[span_201](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_29](start_span)[span_29](end_span)">[span_30](start_span)[span_30](end_span)</a></sup>，我建议您采用<strong>上/下肢分化</strong>。</p>
+
+    <p><strong>训练原则：</strong></p>
+    <ul>
+        <li><strong>渐进超负荷：</strong> 每次训练都尝试增加重量、重复次数或组数，或缩短组间休息时间<sup class="citation"><a href="#snippet-[span_162](start_span)[span_162](end_span)">[span_163](start_span)[span_163](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_175](start_span)[span_175](end_span)">[span_176](start_span)[span_176](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_186](start_span)[span_186](end_span)">[span_187](start_span)[span_187](end_span)</a></sup>。</li>
+        <li><strong>训练量：</strong> 每个主要肌肉群每周目标 <strong>12-16组</strong><sup class="citation"><a href="#snippet-[span_78](start_span)[span_78](end_span)">[span_79](start_span)[span_79](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_215](start_span)[span_215](end_span)">[span_216](start_span)[span_216](end_span)</a></sup>。</li>
+        <li><strong>重复次数：</strong> 大多数动作选择 <strong>6-12次</strong> 重复，并确保每组都训练到接近力竭（在力竭前留下2-3次重复）<sup class="citation"><a href="#snippet-[span_164](start_span)[span_164](end_span)">[span_165](start_span)[span_165](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_217](start_span)[span_217](end_span)">[span_218](start_span)[span_218](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_381](start_span)[span_381](end_span)">[span_382](start_span)[span_382](end_span)</a></sup>。</li>
+        <li><strong>组间休息：</strong> 复合动作休息90-120秒，孤立动作休息60-90秒。</li>
+    </ul>
+
+    <p><strong>具体训练日安排：</strong></p>
+    <table>
+        <thead>
+            <tr>
+                <th>日期</th>
+                <th>训练重点</th>
+                <th>核心动作示例 (3-4组，每组6-12次重复，除非另有说明)</th>
+                <th>有氧/其他</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>周一</strong></td>
+                <td><strong>上半身力量</strong></td>
+                <td>1. 杠铃卧推 (胸)<sup class="citation"><a href="#snippet-[span_188](start_span)[span_188](end_span)">[span_116](start_span)[span_116](end_span)</a></sup> <br> 2. 杠铃划船 (背)<sup class="citation"><a href="#snippet-[span_80](start_span)[span_80](end_span)">[span_81](start_span)[span_81](end_span)</a></sup> <br> 3. 哑铃肩上推举 (肩)<sup class="citation"><a href="#snippet-[span_189](start_span)[span_189](end_span)">[span_117](start_span)[span_117](end_span)</a></sup> <br> 4. 引体向上或高位下拉 (背)<sup class="citation"><a href="#snippet-[span_82](start_span)[span_82](end_span)">[span_83](start_span)[span_83](end_span)</a></sup> <br> 5. 杠铃弯举 (二头肌) <br> 6. 窄距卧推或绳索下压 (三头肌)</td>
+                <td>无</td>
+            </tr>
+            <tr>
+                <td><strong>周二</strong></td>
+                <td><strong>下半身力量</strong></td>
+                <td>1. 杠铃深蹲 (股四头肌、臀肌)<sup class="citation"><a href="#snippet-[span_190](start_span)[span_190](end_span)">[span_118](start_span)[span_118](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_84](start_span)[span_84](end_span)">[span_85](start_span)[span_85](end_span)</a></sup> <br> 2. 罗马尼亚硬拉 (腘绳肌、臀肌)<sup class="citation"><a href="#snippet-[span_202](start_span)[span_202](end_span)">[span_203](start_span)[span_203](end_span)</a></sup> <br> 3. 箭步蹲 (股四头肌、臀肌)<sup class="citation"><a href="#snippet-[span_191](start_span)[span_191](end_span)">[span_119](start_span)[span_119](end_span)</a></sup> <br> 4. 腿举 (股四头肌) <br> 5. 坐姿腿弯举 (腘绳肌) <br> 6. 站姿提踵 (小腿)</td>
+                <td>无</td>
+            </tr>
+            <tr>
+                <td><strong>周三</strong></td>
+                <td><strong>主动恢复/LISS有氧</strong></td>
+                <td><strong>休息日，但进行低强度有氧或活动：</strong> <br> - <strong>LISS有氧：</strong> 快走、慢跑、椭圆机或自行车，持续30-45分钟，心率保持在最大心率的60-70%<sup class="citation"><a href="#snippet-[span_228](start_span)[span_228](end_span)">[span_229](start_span)[span_229](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_177](start_span)[span_177](end_span)">[span_178](start_span)[span_178](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_204](start_span)[span_204](end_span)">[span_205](start_span)[span_205](end_span)</a></sup>。 <br> - <strong>柔韧性/活动度训练：</strong> 泡沫轴放松、静态拉伸或瑜伽<sup class="citation"><a href="#snippet-[span_287](start_span)[span_287](end_span)">[span_288](start_span)[span_288](end_span)</a></sup>。</td>
+                <td>LISS有氧</td>
+            </tr>
+            <tr>
+                <td><strong>周四</strong></td>
+                <td><strong>上半身力量</strong></td>
+                <td>1. 上斜哑铃卧推 (胸)<sup class="citation"><a href="#snippet-[span_192](start_span)[span_192](end_span)">[span_120](start_span)[span_120](end_span)</a></sup> <br> 2. 坐姿绳索划船 (背) <br> 3. 哑铃侧平举 (肩)<sup class="citation"><a href="#snippet-[span_86](start_span)[span_86](end_span)">[span_87](start_span)[span_87](end_span)</a></sup> <br> 4. 面拉 (肩、上背) <br> 5. 哑铃弯举 (二头肌) <br> 6. 过头臂屈伸 (三头肌)</td>
+                <td>无</td>
+            </tr>
+            <tr>
+                <td><strong>周五</strong></td>
+                <td><strong>下半身力量</strong></td>
+                <td>1. 前蹲或保加利亚分腿蹲 (股四头肌、臀肌)<sup class="citation"><a href="#snippet-[span_219](start_span)[span_219](end_span)">[span_52](start_span)[span_52](end_span)</a></sup> <br> 2. 臀冲 (臀肌) <br> 3. 腿屈伸 (股四头肌)<sup class="citation"><a href="#snippet-[span_220](start_span)[span_220](end_span)">[span_53](start_span)[span_53](end_span)</a></sup> <br> 4. 俯卧腿弯举 (腘绳肌) <br> 5. 坐姿提踵 (小腿)</td>
+                <td>无</td>
+            </tr>
+            <tr>
+                <td><strong>周六</strong></td>
+                <td><strong>HIIT有氧/核心</strong></td>
+                <td><strong>HIIT有氧：</strong> 15-30分钟，例如： <br> - 冲刺跑（全力冲刺30秒，休息60-90秒，重复10-15次）<sup class="citation"><a href="#snippet-[span_236](start_span)[span_236](end_span)">[span_237](start_span)[span_237](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_249](start_span)[span_249](end_span)">[span_250](start_span)[span_250](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_349](start_span)[span_349](end_span)">[span_350](start_span)[span_350](end_span)</a></sup>。 <br> - 波比跳、跳绳、开合跳等高强度动作与短暂休息交替进行<sup class="citation"><a href="#snippet-[span_238](start_span)[span_238](end_span)">[span_239](start_span)[span_239](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_251](start_span)[span_251](end_span)">[span_252](start_span)[span_252](end_span)</a></sup>。 <br> <strong>核心训练（15-20分钟）：</strong> <br> - 平板支撑 (3组，每组保持30-60秒)<sup class="citation"><a href="#snippet-[span_221](start_span)[span_221](end_span)">[span_54](start_span)[span_54](end_span)</a></sup> <br> - 俄罗斯转体 (3组，每组15-20次)<sup class="citation"><a href="#snippet-[span_222](start_span)[span_222](end_span)">[span_55](start_span)[span_55](end_span)</a></sup> <br> - 悬垂举腿或仰卧举腿 (3组，每组10-15次)<sup class="citation"><a href="#snippet-[span_223](start_span)[span_223](end_span)">[span_56](start_span)[span_56](end_span)</a></sup></td>
+                <td>HIIT有氧 + 核心</td>
+            </tr>
+            <tr>
+                <td><strong>周日</strong></td>
+                <td><strong>完全休息</strong></td>
+                <td>无</td>
+                <td>完全休息，促进身体恢复<sup class="citation"><a href="#snippet-[span_316](start_span)[span_316](end_span)">[span_317](start_span)[span_317](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_289](start_span)[span_289](end_span)">[span_290](start_span)[span_290](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_264](start_span)[span_264](end_span)">[span_265](start_span)[span_265](end_span)</a></sup></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>3. 皮质醇管理与恢复：每日实践</h3>
+    <ul>
+        <li><strong>睡眠：</strong> 每天争取在相同时间睡觉和起床，即使在周末也尽量保持规律<sup class="citation"><a href="#snippet-[span_318](start_span)[span_318](end_span)">[span_319](start_span)[span_319](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_266](start_span)[span_266](end_span)">[span_267](start_span)[span_267](end_span)</a></sup>。睡前1小时避免电子屏幕，确保卧室凉爽、黑暗、安静<sup class="citation"><a href="#snippet-[span_320](start_span)[span_320](end_span)">[span_321](start_span)[span_321](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_268](start_span)[span_268](end_span)">[span_269](start_span)[span_269](end_span)</a></sup>。</li>
+        <li><strong>减压：</strong> 每天花时间进行深呼吸练习（例如，每天3-5次，每次5分钟）<sup class="citation"><a href="#snippet-[span_351](start_span)[span_351](end_span)">[span_352](start_span)[span_352](end_span)</a></sup>。培养爱好，如阅读、听音乐、绘画，或简单地到户外散步，亲近自然<sup class="citation"><a href="#snippet-[span_322](start_span)[span_322](end_span)">[span_323](start_span)[span_323](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_353](start_span)[span_353](end_span)">[span_354](start_span)[span_354](end_span)</a></sup>。</li>
+        <li><strong>避免过度训练：</strong> 倾听身体信号，如果感到持续疲劳或表现下降，考虑减少训练量或增加休息日<sup class="citation"><a href="#snippet-[span_324](start_span)[span_324](end_span)">[span_325](start_span)[span_325](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_291](start_span)[span_291](end_span)">[span_292](start_span)[span_292](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_270](start_span)[span_270](end_span)">[span_271](start_span)[span_271](end_span)</a></sup>。定期（例如每6-8周）安排一个减载周，降低训练强度和量，让身体充分恢复<sup class="citation"><a href="#snippet-[span_326](start_span)[span_326](end_span)">[span_327](start_span)[span_327](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_293](start_span)[span_293](end_span)">[span_294](start_span)[span_294](end_span)</a></sup>。</li>
+        <li><strong>营养：</strong> 坚持摄入全食物，多吃蔬菜水果，限制加工食品、高糖食物和过量咖啡因的摄入，这有助于调节皮质醇水平<sup class="citation"><a href="#snippet-[span_328](start_span)[span_328](end_span)">[span_329](start_span)[span_329](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_355](start_span)[span_355](end_span)">[span_356](start_span)[span_356](end_span)</a></sup>。</li>
+    </ul>
+
+    <h3>4. 追踪您的成功：超越体重秤</h3>
+    <p>除了体重，您还需要关注以下指标来全面评估身体重塑的进展：</p>
+    <ul>
+        <li><strong>身体围度：</strong> 每2-4周测量一次腰围、臀围、胸围、大腿围和手臂围，记录变化<sup class="citation"><a href="#snippet-[span_383](start_span)[span_383](end_span)">[span_384](start_span)[span_384](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_413](start_span)[span_413](end_span)">[span_414](start_span)[span_414](end_span)</a></sup>。</li>
+        <li><strong>体脂率：</strong> 如果条件允许，定期进行体脂率测试（如生物电阻抗分析BIA或DEXA扫描）<sup class="citation"><a href="#snippet-[span_14](start_span)[span_14](end_span)">[span_15](start_span)[span_15](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_272](start_span)[span_272](end_span)">[span_273](start_span)[span_273](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_415](start_span)[span_415](end_span)">[span_416](start_span)[span_416](end_span)</a></sup>。</li>
+        <li><strong>力量表现：</strong> 记录您在健身房举起的重量、完成的重复次数或训练时间，观察力量是否持续增长<sup class="citation"><a href="#snippet-[span_385](start_span)[span_385](end_span)">[span_386](start_span)[span_386](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_417](start_span)[span_417](end_span)">[span_418](start_span)[span_418](end_span)</a></sup>。</li>
+        <li><strong>照片对比：</strong> 每月拍摄一次身体照片（正面、侧面、背面），在相同光线和姿势下进行，直观对比身体形态变化<sup class="citation"><a href="#snippet-[span_387](start_span)[span_387](end_span)">[span_388](start_span)[span_388](end_span)</a></sup>。</li>
+        <li><strong>衣服合身度：</strong> 留意衣服的穿着感受，这通常是身体成分变化的早期迹象<sup class="citation"><a href="#snippet-[span_389](start_span)[span_389](end_span)">[span_390](start_span)[span_390](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_419](start_span)[span_419](end_span)">[span_420](start_span)[span_420](end_span)</a></sup>。</li>
+        <li><strong>能量水平和情绪：</strong> 关注日常能量水平、睡眠质量和整体情绪的改善<sup class="citation"><a href="#snippet-[span_391](start_span)[span_391](end_span)">[span_392](start_span)[span_392](end_span)</a></sup><sup class="citation"><a href="#snippet-[span_421](start_span)[span_421](end_span)">[span_422](start_span)[span_422](end_span)</a></sup>。</li>
+    </ul>
+
+    <p>请记住，身体重塑是一个循序渐进的过程，需要耐心和坚持。通过严格执行这份计划，并根据身体的反馈进行调整，您将能够有效地实现增肌减脂的目标。</p>
+
+    <div class="detailed-theory-section">
+        <h2>详细介绍与理论</h2>
+
+        <div id="snippet-[span_38](start_span)[span_38](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_39](start_span)[span_39](end_span)">[span_40](start_span)[span_40](end_span)</a>: 身体重塑的卡路里赤字</h4>
+            <p>身体重塑通常建议采用轻微的卡路里赤字，目标是比维持体重所需的卡路里低200-400卡路里。这种赤字允许身体利用脂肪储备来获取能量，同时确保有足够的燃料支持肌肉蛋白质合成和高强度抗阻训练后的恢复。</p>
+        </div>
+
+        <div id="snippet-[span_57](start_span)[span_57](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_58](start_span)[span_58](end_span)">[span_59](start_span)[span_59](end_span)</a>: 身体重塑的策略与时间线</h4>
+            <p>身体重塑是一个策略性的过程，旨在同时减少体脂并增加或维持瘦肌肉量。这通常比单纯减脂或单纯增肌要慢，因为身体同时进行着两种代谢上相对立的过程。通常，身体形态的显著变化可能需要2-3个月才能显现，而真正显著且持久的转变往往需要6个月或更长时间的持续努力。身体重塑需要持续的努力，每周大约需要3-4小时的力量训练和1-3小时的有氧运动，并需要额外时间准备健康的膳食。</p>
+        </div>
+
+        <div id="snippet-[span_21](start_span)[span_21](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_22](start_span)[span_22](end_span)">[span_23](start_span)[span_23](end_span)</a>: TDEE计算与体重管理</h4>
+            <p>TDEE（Total Daily Energy Expenditure）是您的身体每天燃烧的总卡路里量，包括基础代谢率（BMR）以及所有形式的运动和日常活动所消耗的卡路里。TDEE的计算方法是BMR乘以活动水平乘数。对于每周训练3-5天的中度活跃个体，活动乘数为1.55。要减肥，您需要摄入比TDEE少的卡路里，研究表明，TDEE的80-90%是一个可持续且安全的“卡路里赤字”。</p>
+        </div>
+
+        <div id="snippet-[span_3](start_span)[span_3](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_4](start_span)[span_4](end_span)">[span_5](start_span)[span_5](end_span)</a>: BMR和TDEE的计算方法</h4>
+            <p>基础代谢率（BMR）是身体在完全休息状态下维持基本生理功能所需的最低卡路里量。Mifflin-St Jeor方程被广泛认为是估算BMR的有效方法。男性BMR计算公式为：(10 × 体重kg) + (6.25 × 身高cm) - (5 × 年龄) + 5。总能量消耗（TDEE）通过将BMR乘以活动水平乘数来确定：久坐不动（BMR x 1.2），轻度活跃（BMR x 1.375），中度活跃（BMR x 1.55），非常活跃（BMR x 1.725），超级活跃（BMR x 1.9）。膳食指南建议碳水化合物占每日卡路里的45-65%。</p>
+        </div>
+
+        <div id="snippet-[span_8](start_span)[span_8](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_9](start_span)[span_9](end_span)">[span_10](start_span)[span_10](end_span)</a>: BMR的定义与准确性</h4>
+            <p>BMR衡量的是在黑暗房间（斜躺姿势）经过八小时睡眠和十二小时禁食后，身体的能量消耗。Mifflin-St Jeor方程在1990年代创建，提供了更有效的RMR（静息代谢率）估计。研究表明，Mifflin-St Jeor方程的准确性在真实RMR的10%以内，但对于肥胖个体，其他公式的误差可能高达36%。</p>
+        </div>
+
+        <div id="snippet-[span_107](start_span)[span_107](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_108](start_span)[span_108](end_span)">[span_109](start_span)[span_109](end_span)</a>: 宏量营养素比例与代谢优势</h4>
+            <p>蛋白质、碳水化合物和脂肪的比例对于优化身体重塑至关重要。作为基线，大多数人蛋白质、脂肪、碳水化合物的比例分别为30%、30%和40%。对于减脂，建议将蛋白质比例提高到30-35%。蛋白质具有较高的食物热效应（TEF），消化和吸收蛋白质会消耗大约20-30%的蛋白质卡路里，而脂肪不到3%，碳水化合物为5-10%。这意味着高蛋白饮食有助于产生略大的有效卡路里赤字。</p>
+        </div>
+
+        <div id="snippet-[span_88](start_span)[span_88](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_89](start_span)[span_89](end_span)">[span_90](start_span)[span_90](end_span)</a>: 身体重塑的训练与营养策略</h4>
+            <p>身体重塑需要每日波动周期化（DUP）以优化进展，每周训练每个肌肉群2-3次。建议每周每个肌肉群进行10-20组训练，初学者10-12组，中级者12-16组。优先选择复合动作（如深蹲、硬拉、卧推）和辅助动作（如箭步蹲、臂屈伸）。蛋白质是身体重塑最关键的宏量营养素，建议每日每磅体重摄入1.0至1.2克蛋白质，并均匀分配到4-5餐中。策略性地根据训练日进行卡路里和碳水化合物循环，训练日略微增加卡路里和碳水化合物，休息日则减少。</p>
+        </div>
+
+        <div id="snippet-[span_16](start_span)[span_16](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_17](start_span)[span_17](end_span)">[span_18](start_span)[span_18](end_span)</a>: ISSN蛋白质摄入建议</h4>
+            <p>国际运动营养学会（ISSN）指出，经常进行运动训练的个体比久坐不动的人需要更多的膳食蛋白质。对于体力活动活跃的个体，每日每公斤体重摄入1.4-2.0克蛋白质不仅安全，而且可能改善对运动训练的适应。蛋白质的适时摄入是整体运动训练计划的重要组成部分，对于适当的恢复、免疫功能以及瘦体重的增长和维持至关重要。</p>
+        </div>
+
+        <div id="snippet-[span_141](start_span)[span_141](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_142](start_span)[span_142](end_span)">[span_143](start_span)[span_143](end_span)</a>: 训练前后的营养指南</h4>
+            <p>训练前营养：理想情况下，在训练前1-4小时补充能量，主要由碳水化合物和蛋白质组成，如花生酱香蕉三明治、希腊酸奶配浆果、燕麦片配低脂牛奶和水果。训练后营养：在高强度训练后，目标是在约60分钟内摄入碳水化合物和蛋白质的组合，以迅速补充耗尽的肌肉糖原储备，并为肌肉修复和生长提供必要的氨基酸，如训练后恢复冰沙、低脂巧克力牛奶、全麦卷饼配火鸡肉和蔬菜。</p>
+        </div>
+
+        <div id="snippet-[span_150](start_span)[span_150](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_151](start_span)[span_151](end_span)">[span_152](start_span)[span_152](end_span)</a>: 补水的重要性与脱水影响</h4>
+            <p>充足的补水对于优化运动表现、促进肌肉功能和整体健康至关重要。脱水（即使是2%的体重水分流失）会显著影响运动表现，导致心率增加、疲劳、力量和力量下降。电解质（如钠、钾、钙和镁）对于维持肌肉、器官和关节的正常功能至关重要。尿液颜色变深是脱水的迹象。过度补水可能导致低钠血症。</p>
+        </div>
+
+        <div id="snippet-[span_157](start_span)[span_157](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_158](start_span)[span_158](end_span)">[span_159](start_span)[span_159](end_span)</a>: 运动员的补水与电解质</h4>
+            <p>对于运动员来说，在运动前、中、后摄入足够的水分至关重要。每小时的活动可能导致高达2夸脱的液体流失，同时伴随盐分流失。脱水会影响运动表现、耐力、呼吸和情绪。电解质（包括盐和矿物质如钾、磷酸盐、钙和镁）对于维持身体肌肉、器官和关节的正常功能至关重要。建议成人每20分钟运动摄入6-12盎司液体。运动后，目标是每减掉一磅体重，补充16-24盎司的水或低渗运动饮料。</p>
+        </div>
+
+        <div id="snippet-[span_166](start_span)[span_166](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_167](start_span)[span_167](end_span)">[span_168](start_span)[span_168](end_span)</a>: 渐进超负荷与SAID原则</h4>
+            <p>渐进超负荷是指随着时间的推移，系统性地增加施加在肌肉上的训练压力，是持续提高表现和身体素质的关键原则。可以通过增加重复次数、组数、重量、每周训练次数或减少组间休息时间来实现。SAID原则（Specific Adaptations to Imposed Demands，特殊性原则）指出，身体会根据施加在其上的特定物理需求进行适应，因此训练计划应根据具体目标进行设计。</p>
+        </div>
+
+        <div id="snippet-[span_179](start_span)[span_179](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_180](start_span)[span_180](end_span)">[span_181](start_span)[span_181](end_span)</a>: 渐进超负荷对肌肉和耐力的影响</h4>
+            <p>渐进超负荷对于肌肉肥大（肌肉生长）、力量增长和耐力发展至关重要。通过逐渐增加对肌肉的需求，它刺激肌肉生长，并通过不断挑战肌肉举起更重的重量来增加力量。它还能通过逐渐增加训练量或强度来提高心血管和肌肉耐力。没有渐进超负荷，身体会适应当前的训练刺激并达到平台期。</p>
+        </div>
+
+        <div id="snippet-[span_193](start_span)[span_193](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_194](start_span)[span_194](end_span)">[span_195](start_span)[span_195](end_span)</a>: 训练计划设计原则与SMART目标</h4>
+            <p>训练计划应基于客户的个人需求和能力，以最大限度地提高有效性和效率，并降低受伤或过度训练的风险。特殊性原则（SAID原则）强调身体会根据施加的特定物理需求进行适应。超负荷原则指训练压力应超过之前的训练压力。渐进原则指随着时间的推移系统地修改训练计划。设定SMART目标（具体、可衡量、可实现、相关、有时间限制）对于指导成功至关重要。</p>
+        </div>
+
+        <div id="snippet-[span_206](start_span)[span_206](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_207](start_span)[span_207](end_span)">[span_208](start_span)[span_208](end_span)</a>: 常见训练分化及其优缺点</h4>
+            <p>常见的训练分化包括全身训练、推/拉/腿（PPL）、上/下肢分化和身体部位分化（Bro Split）。对于中级训练者，当全身训练变得过于疲劳时，将训练量分散到更多天会更有益。上/下肢分化通常每周训练4天，每个主要肌肉群每周可以训练两次，这提供了足够的刺激频率，有利于肌肉生长和力量提升。传统的3天PPL分化可能不足以刺激肌肉生长，因为它每周只针对主要肌肉群一次。Bro Split通常每周训练5天，每天专注于一个特定身体部位，但可能导致腿部训练频率不足。</p>
+        </div>
+
+        <div id="snippet-[span_31](start_span)[span_31](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_32](start_span)[span_32](end_span)">[span_33](start_span)[span_33](end_span)</a>: 针对初学者和中级者的训练分化</h4>
+            <p>对于初学者，3天全身训练是理想选择，强调复合动作，效率高。对于中级者，当全身训练变得过于疲劳时，将训练量分散到更多天会更有益。4天或5天的上/下肢分化是理想选择，因为它们允许每个主要肌肉群每周训练两次，这对于最大化肌肉生长和力量提升至关重要。建议每周每个肌肉群进行9-18组训练，并将其分散到至少两次训练中。训练到接近力竭是关键。</p>
+        </div>
+
+        <div id="snippet-[span_230](start_span)[span_230](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_231](start_span)[span_231](end_span)">[span_232](start_span)[span_232](end_span)</a>: 有氧运动的整合与频率</h4>
+            <p>有氧运动对于增强脂肪流失和改善心血管健康是不可或缺的。高强度间歇训练（HIIT）和传统心血管运动（如跑步、游泳、骑自行车）都可以促进身体重塑。建议每周进行2-3天有氧运动。HIIT训练可以每周进行1-2次，每次15-30分钟。此外，每周至少进行120分钟的低强度稳定状态有氧训练（LISS），每次30-45分钟，心率保持在最大心率的60-70%。</p>
+        </div>
+
+        <div id="snippet-[span_240](start_span)[span_240](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_241](start_span)[span_241](end_span)">[span_242](start_span)[span_242](end_span)</a>: HIIT与LISS的燃脂机制</h4>
+            <p>高强度间歇训练（HIIT）涉及短时间高强度爆发性运动，随后是短暂的积极恢复或休息期。它高效燃脂，并在运动后产生更高的额外氧耗（EPOC），使身体在运动结束后继续燃烧卡路里。低强度稳态有氧（LISS）专注于长时间的持续低强度运动，主要以脂肪为燃料。HIIT在运动期间主要依赖碳水化合物，而LISS主要以脂肪为燃料。结合两者能获得全面均衡的效果。</p>
+        </div>
+
+        <div id="snippet-[span_253](start_span)[span_253](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_254](start_span)[span_254](end_span)">[span_255](start_span)[span_255](end_span)</a>: HIIT与LISS的优缺点对比</h4>
+            <p>HIIT的优点包括：时间效率高、运动后持续燃脂（EPOC）、有助于肌肉保留。缺点是：对身体要求更高、恢复时间更长、不适合每天进行。LISS的优点包括：对身体压力较小、受伤风险低、主要以脂肪为燃料。缺点是：燃脂速度较慢、只在运动期间燃脂、身体适应速度快可能导致效果停滞。建议结合两者以获得最佳效果。</p>
+        </div>
+
+        <div id="snippet-[span_295](start_span)[span_295](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_296](start_span)[span_296](end_span)">[span_297](start_span)[span_297](end_span)</a>: 有氧与力量训练的顺序</h4>
+            <p>如果要在一次训练中结合有氧和力量训练，一般建议先进行力量训练，后进行有氧。原因在于：力量训练需要您所有的能量来保持高效和正确的姿势，有氧运动在力量训练后进行时，身体可能更容易利用脂肪作为燃料。在力量训练前进行有氧可能会预先疲劳肌肉，影响力量表现和增加受伤风险。理想情况下，将有氧训练和力量训练分开进行，中间间隔4-6小时，以最大限度地提高两种训练的效果。</p>
+        </div>
+
+        <div id="snippet-[span_298](start_span)[span_298](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_299](start_span)[span_299](end_span)">[span_300](start_span)[span_300](end_span)</a>: 力量训练与有氧训练的平衡</h4>
+            <p>在同一天进行力量训练和有氧训练是可行的，但应优先考虑其中一项。如果主要目标是力量增长，则先进行力量训练。如果主要目标是耐力提升，则先进行有氧训练。力量训练主要消耗肌肉中的糖原，先进行力量训练能确保最佳表现。研究表明，同时进行有氧和力量训练对最大力量或肌肉肥大的发展影响很小。建议在两次训练之间至少间隔4-6小时，或在同一训练中平衡强度和量。</p>
+        </div>
+
+        <div id="snippet-[span_393](start_span)[span_393](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_394](start_span)[span_394](end_span)">[span_395](start_span)[span_395](end_span)</a>: 皮质醇对身体重塑的负面影响</h4>
+            <p>皮质醇被称为“压力荷尔蒙”，由肾上腺分泌。虽然适量的皮质醇在运动中能动员能量，但长期高水平的皮质醇会对身体重塑产生不利影响。它会抑制蛋白质合成，使肌肉难以修复和生长，并可能导致肌肉分解。长期升高的皮质醇还会导致脂肪储存增加，特别是腹部周围的脂肪。此外，高皮质醇还会影响睡眠质量，削弱免疫系统，并增加肌肉紧张。</p>
+        </div>
+
+        <div id="snippet-[span_400](start_span)[span_400](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_401](start_span)[span_401](end_span)">[span_402](start_span)[span_402](end_span)</a>: 皮质醇与生长激素在运动中的作用</h4>
+            <p>皮质醇是身体应对压力和运动的关键参与者，在运动期间升高以促进糖原分解为葡萄糖，提供能量。然而，长期升高会导致肌肉分解、免疫功能受损和脂肪储存增加。生长激素（GH）是组织修复、肌肉生长和对身体压力整体适应的关键驱动因素。抗阻训练能显著提升生长激素水平，它还有助于动员脂肪作为能量。优化生长激素的释放需要充足的睡眠和适当的营养。</p>
+        </div>
+
+        <div id="snippet-[span_372](start_span)[span_372](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_373](start_span)[span_373](end_span)">[span_374](start_span)[span_374](end_span)</a>: 睡眠与荷尔蒙平衡</h4>
+            <p>睡眠是身体恢复和荷尔蒙平衡的关键组成部分。睡眠期间，身体会修复肌肉组织，补充能量储备，并平衡荷尔蒙，包括生长激素（GH）和皮质醇。生长激素水平在睡眠期间升高，并在睡眠开始后立即达到峰值，对组织修复、肌肉生长和对身体压力的整体适应起着核心作用。睡眠不足会扰乱皮质醇和睾酮等荷尔蒙的平衡，这些荷尔蒙对恢复至关重要。</p>
+        </div>
+
+        <div id="snippet-[span_330](start_span)[span_330](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_331](start_span)[span_331](end_span)">[span_332](start_span)[span_332](end_span)</a>: 恢复不足的常见误区与后果</h4>
+            <p>常见的恢复误区包括过度训练、睡眠不足和营养不良。过度训练是指身体承受的累积运动压力超过其恢复和重建的能力，导致慢性疲劳、表现下降和受伤。睡眠不足会扰乱荷尔蒙平衡（如皮质醇和睾酮），增加受伤风险。营养不良（如蛋白质摄入不足、跳餐、脱水、饮食不均衡）会阻碍肌肉修复和生长，导致恢复不佳和疲劳。</p>
+        </div>
+
+        <div id="snippet-[span_357](start_span)[span_357](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_358](start_span)[span_358](end_span)">[span_359](start_span)[span_359](end_span)</a>: 降低皮质醇的实用策略</h4>
+            <p>管理皮质醇水平的实用策略包括：摄入全食物、植物性饮食（富含纤维），在医生指导下补充镁、维生素B12、叶酸和维生素C，进行深呼吸练习，减少咖啡因摄入，保证充足睡眠（7-8小时），规律运动，写日记，培养爱好，亲近自然。这些方法有助于降低皮质醇，缓解焦虑和抑郁，并支持整体健康。</p>
+        </div>
+
+        <div id="snippet-[span_274](start_span)[span_274](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_275](start_span)[span_275](end_span)">[span_276](start_span)[span_276](end_span)</a>: 超越体重秤的身体成分追踪</h4>
+            <p>在身体重塑过程中，仅仅依靠体重秤上的数字来衡量进步是不足够的，因为它无法区分体重是来自肌肉、脂肪还是水分。了解身体成分（脂肪与瘦体重的比例）能提供更清晰的画面。生物电阻抗分析（BIA）和皮褶卡尺是较容易获取的体脂测试方法，而双能X射线吸收法（DEXA）被认为是体脂百分比测量的“黄金标准”，提供无与伦比的细节水平，包括区域脂肪分布。</p>
+        </div>
+
+        <div id="snippet-[span_423](start_span)[span_423](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_424](start_span)[span_424](end_span)">[span_425](start_span)[span_425](end_span)</a>: 监测健身进展的替代指标</h4>
+            <p>为了获得对健身旅程更全面的理解，建议关注以下替代指标：身体测量（如腰围、臀围、臂围），力量和耐力（记录举起的重量、重复次数），能量水平和情绪，衣服合身度，静息心率，柔韧性和活动度，以及整体幸福感。设定SMART目标（具体、可衡量、可实现、相关、有时间限制）对于指导成功至关重要。</p>
+        </div>
+
+        <div id="snippet-[span_430](start_span)[span_430](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_431](start_span)[span_431](end_span)">[span_432](start_span)[span_432](end_span)</a>: 运动后恢复的常见错误</h4>
+            <p>运动后常见的错误包括：跳过放松（可能导致血液淤积、压力增加、乳酸堆积），暴饮暴食或饮食不足（影响肌肉生长和恢复），忽视补水（导致脱水症状如头痛、疲劳），忽视休息和恢复（导致过度训练、荷尔蒙失衡），以及不进行拉伸。确保充分的休息和营养对于肌肉修复和生长至关重要。</p>
+        </div>
+
+        <div id="snippet-[span_126](start_span)[span_126](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_127](start_span)[span_127](end_span)">[span_128](start_span)[span_128](end_span)</a>: 宏量营养素的食物来源</h4>
+            <p>碳水化合物的良好来源包括全谷物面包、土豆、意大利面、糙米、水果、谷物、燕麦和一些蔬菜（玉米、胡萝卜、豌豆）。蛋白质的良好来源包括鸡蛋、瘦肉、低脂奶酪、低脂牛奶、酸奶、坚果、豆类和花生酱。健康的脂肪来源包括坚果、橄榄油、菜籽油、花生酱、种子、鱼和牛油果。应限制快餐、油炸食品和高脂肪调味品。</p>
+        </div>
+
+        <div id="snippet-[span_435](start_span)[span_435](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_436](start_span)[span_436](end_span)">[span_437](start_span)[span_437](end_span)</a>: ACSM运动指南</h4>
+            <p>美国运动医学会（ACSM）被认为是运动建议的“黄金标准”。ACSM和CDC建议所有18-65岁的健康成年人每周至少5天进行30分钟的中等强度有氧运动，或每周至少3天进行20分钟的剧烈强度有氧运动。此外，所有成年人每周至少进行两天维持或增加肌肉力量和耐力的活动。</p>
+        </div>
+
+        <div id="snippet-[span_376](start_span)[span_376](end_span)" class="detailed-theory-item">
+            <h4><a href="#snippet-[span_377](start_span)[span_377](end_span)">[span_378](start_span)[span_378](end_span)</a>: 睡眠剥夺与代谢失调</h4>
+            <p>睡眠障碍和睡眠剥夺会对身体的荷尔蒙节律和代谢过程产生负面影响，并与肥胖、胰岛素抵抗、糖尿病和荷尔蒙失衡相关。睡眠剥夺和昼夜节律失调被认为通过交感神经过度刺激、荷尔蒙失衡和亚临床炎症等多种途径导致代谢失调。</p>
+        </div>
+    </div>
+
 </body>
 </html>
